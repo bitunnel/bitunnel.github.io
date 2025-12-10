@@ -5,7 +5,6 @@
     <title>Bitunnel – Hızlı ve Güvenli Giriş Merkezi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Bitunnel, birden fazla web sitesine tek noktadan hızlı ve güvenli erişim sağlayan modern bir giriş merkezidir.">
-    <meta name="keywords" content="bitunnel, giriş merkezi, link hub, hızlı erişim, çoklu site girişi">
     <link rel="canonical" href="https://bitunnel.github.io/">
 
     <!-- Open Graph -->
@@ -97,6 +96,13 @@
             color: var(--text-muted);
         }
 
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
         .status-pill {
             padding: 4px 9px;
             border-radius: 999px;
@@ -116,6 +122,23 @@
             border-radius: 999px;
             background: #22c55e;
             box-shadow: 0 0 0 6px rgba(34,197,94,0.35);
+        }
+
+        .theme-toggle {
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.7);
+            background: rgba(15,23,42,0.8);
+            color: var(--text-muted);
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .theme-toggle span.icon {
+            font-size: 13px;
         }
 
         main {
@@ -321,6 +344,29 @@
             color: #6b7280;
         }
 
+        .category-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .category-pill {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.45);
+            background: rgba(15,23,42,0.9);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .category-pill.active {
+            background: radial-gradient(circle at 0 0, rgba(79,70,229,0.9) 0, rgba(37,99,235,1) 55%);
+            color: #e5e7eb;
+            border-color: rgba(129,140,248,0.9);
+        }
+
         .link-list {
             display: flex;
             flex-direction: column;
@@ -420,6 +466,61 @@
             text-decoration-style: dotted;
             text-underline-offset: 3px;
         }
+
+        /* AÇIK TEMA */
+        body.light-theme {
+            background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 40%, #e5e7eb 100%);
+            color: #111827;
+        }
+
+        body.light-theme .hero,
+        body.light-theme .link-panel {
+            background: #ffffff;
+            border-color: rgba(209,213,219,0.9);
+            box-shadow: 0 18px 40px rgba(148,163,184,0.4);
+        }
+
+        body.light-theme .search-input {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #111827;
+        }
+
+        body.light-theme .category-pill {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #4b5563;
+        }
+
+        body.light-theme .category-pill.active {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #f9fafb;
+            border-color: #4f46e5;
+        }
+
+        body.light-theme .link-item {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
+        body.light-theme .link-url {
+            color: #6b7280;
+        }
+
+        body.light-theme .link-note {
+            color: #6b7280;
+        }
+
+        body.light-theme footer {
+            border-color: #e5e7eb;
+            color: #6b7280;
+        }
+
+        body.light-theme .theme-toggle {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+            color: #4b5563;
+        }
     </style>
 </head>
 <body>
@@ -433,9 +534,15 @@
             </div>
         </div>
 
-        <div class="status-pill" aria-label="Sistem durumu">
-            <span class="status-dot"></span>
-            Online • düşük gecikme
+        <div class="header-right">
+            <div class="status-pill" aria-label="Sistem durumu">
+                <span class="status-dot"></span>
+                Online • düşük gecikme
+            </div>
+            <button type="button" class="theme-toggle" id="theme-toggle">
+                <span class="icon" id="theme-icon">🌙</span>
+                <span id="theme-label">Açık temaya geç</span>
+            </button>
         </div>
     </header>
 
@@ -498,10 +605,19 @@
                     placeholder="Linklerde ara (isim, adres veya etiket)...">
             </div>
 
+            <!-- Kategori sekmeleri -->
+            <div class="category-row">
+                <button class="category-pill active" data-filter="all">Hepsi</button>
+                <button class="category-pill" data-filter="panel">Paneller</button>
+                <button class="category-pill" data-filter="support">Destek</button>
+                <button class="category-pill" data-filter="report">Raporlama</button>
+                <button class="category-pill" data-filter="other">Diğer</button>
+            </div>
+
             <!-- Link listesi -->
             <div class="link-list">
-                <!-- ÖRNEK 1 – BURAYI KENDİ URL'LERİNLE DEĞİŞTİR -->
-                <article class="link-item">
+                <!-- ÖRNEK 1 – KENDİ URL'İNLE DEĞİŞTİR -->
+                <article class="link-item" data-category="panel">
                     <div class="link-main">
                         <div class="link-label">Yönetim Paneli</div>
                         <div class="link-url">https://ornek-yonetim-paneli.com/login</div>
@@ -524,7 +640,7 @@
                 </article>
 
                 <!-- ÖRNEK 2 -->
-                <article class="link-item">
+                <article class="link-item" data-category="support">
                     <div class="link-main">
                         <div class="link-label">Müşteri Destek Sistemi</div>
                         <div class="link-url">https://destek.ornekdomain.com</div>
@@ -547,7 +663,7 @@
                 </article>
 
                 <!-- ÖRNEK 3 -->
-                <article class="link-item">
+                <article class="link-item" data-category="report">
                     <div class="link-main">
                         <div class="link-label">Raporlama / Analitik</div>
                         <div class="link-url">https://analytics.ornek.com/dashboard</div>
@@ -563,6 +679,29 @@
                         </a>
                         <button class="link-button copy-link" type="button"
                                 data-url="https://analytics.ornek.com/dashboard">
+                            Kopyala
+                            <span class="icon">📋</span>
+                        </button>
+                    </div>
+                </article>
+
+                <!-- ÖRNEK 4 -->
+                <article class="link-item" data-category="other">
+                    <div class="link-main">
+                        <div class="link-label">Doküman Deposu</div>
+                        <div class="link-url">https://docs.ornek.com</div>
+                        <span class="link-tag">Belgeler</span>
+                    </div>
+                    <div class="link-actions">
+                        <a class="link-button open-link"
+                           href="https://docs.ornek.com"
+                           target="_blank"
+                           rel="noopener">
+                            Aç
+                            <span class="icon">↗</span>
+                        </a>
+                        <button class="link-button copy-link" type="button"
+                                data-url="https://docs.ornek.com">
                             Kopyala
                             <span class="icon">📋</span>
                         </button>
@@ -587,30 +726,76 @@
     // Yıl otomatik
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // 🔍 Arama / filtreleme
+    // Tema yönetimi
+    const themeToggle = document.getElementById("theme-toggle");
+    const themeIcon = document.getElementById("theme-icon");
+    const themeLabel = document.getElementById("theme-label");
+    const THEME_KEY = "bitunnel-theme";
+
+    function applyTheme(theme) {
+        const isLight = theme === "light";
+        document.body.classList.toggle("light-theme", isLight);
+        localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
+        themeIcon.textContent = isLight ? "🌞" : "🌙";
+        themeLabel.textContent = isLight ? "Karanlık temaya geç" : "Açık temaya geç";
+    }
+
+    // Kaydedilmiş tema varsa uygula
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme === "light") {
+        applyTheme("light");
+    } else {
+        applyTheme("dark");
+    }
+
+    themeToggle.addEventListener("click", () => {
+        const newTheme = document.body.classList.contains("light-theme") ? "dark" : "light";
+        applyTheme(newTheme);
+    });
+
+    // Arama / kategori filtreleme
     const searchInput = document.getElementById("link-search");
     const linkItems = document.querySelectorAll(".link-item");
+    const categoryButtons = document.querySelectorAll(".category-pill");
+    let currentCategory = "all";
 
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            const query = this.value.toLowerCase().trim();
+    function applyFilters() {
+        const query = (searchInput?.value || "").toLowerCase().trim();
 
-            linkItems.forEach(function (item) {
-                const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
-                const url = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
-                const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
+        linkItems.forEach(function (item) {
+            const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
+            const url = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
+            const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
+            const category = item.getAttribute("data-category") || "other";
 
-                const match =
-                    label.includes(query) ||
-                    url.includes(query) ||
-                    tag.includes(query);
+            const matchText =
+                !query ||
+                label.includes(query) ||
+                url.includes(query) ||
+                tag.includes(query);
 
-                item.style.display = match ? "flex" : "none";
-            });
+            const matchCategory =
+                currentCategory === "all" ||
+                currentCategory === category;
+
+            item.style.display = (matchText && matchCategory) ? "flex" : "none";
         });
     }
 
-    // 📋 Link kopyalama
+    if (searchInput) {
+        searchInput.addEventListener("input", applyFilters);
+    }
+
+    categoryButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            categoryButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentCategory = btn.getAttribute("data-filter") || "all";
+            applyFilters();
+        });
+    });
+
+    // Kopyala
     const copyButtons = document.querySelectorAll(".copy-link");
 
     copyButtons.forEach(function (btn) {
