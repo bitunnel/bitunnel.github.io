@@ -216,6 +216,32 @@
             margin-bottom: 18px;
         }
 
+        .hero-text-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .hero-text-grid p {
+            background: rgba(15,23,42,0.55);
+            padding: 16px 18px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.55;
+            border: 1px solid rgba(148,163,184,0.15);
+            backdrop-filter: blur(4px);
+            color: var(--text-muted);
+        }
+
+        /* Mobilde alt alta */
+            @media (max-width: 768px) {
+            .hero-text-grid {
+            grid-template-columns: 1fr;
+            }
+        }
+
+
         .hero-actions {
             display: flex;
             flex-wrap: wrap;
@@ -607,14 +633,19 @@
                     <span class="accent">tek tünelden</span> erişin.
                 </h1>
 
-                <p>
-                    Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş linklerini hızlı ve güvenli şekilde sunan global bir bağlantı merkezidir. 
-                    Engellenen adresleri takip etmeden, tüm güncel linklere tek tıkla erişim sağlayabilir ve favori platformlarınızı tek bir tünelde toplayabilirsiniz. 
-                    Hafif arayüzü ve yüksek erişilebilirliği ile Bitunnel, kullanıcılar için kesintisiz bağlantı deneyimi sunar.
+                <div class="hero-text-grid">
+    <p>
+        Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş linklerini hızlı ve güvenli şekilde sunan global bir bağlantı merkezidir. 
+        Engellenen adresleri takip etmeden, tüm güncel linklere tek tıkla erişim sağlayabilir ve favori platformlarınızı tek bir tünelde toplayabilirsiniz. 
+        Hafif arayüzü ve yüksek erişilebilirliği ile Bitunnel, kullanıcılar için kesintisiz bağlantı deneyimi sunar.
+    </p>
 
-                    Favori bahis sitelerinizi, casino sağlayıcılarını, panel girişlerinizi ve oyun platformlarını tek bir merkezde toplayabilir; her zaman doğru ve aktif giriş bağlantısına tek bir URL üzerinden erişebilirsiniz. 
-                    Bitunnel, kullanıcı dostu yapısı, hafif arayüzü ve global bağlantı sistemiyle kesintisiz erişim sunmayı amaçlayan modern bir tünel platformudur.
-                </p>
+    <p>
+        Favori bahis sitelerinizi, casino sağlayıcılarını, panel girişlerinizi ve oyun platformlarını tek bir merkezde toplayabilir; her zaman doğru ve aktif giriş bağlantısına tek bir URL üzerinden erişebilirsiniz. 
+        Bitunnel, kullanıcı dostu yapısı, hafif arayüzü ve global bağlantı sistemiyle kesintisiz erişim sunmayı amaçlayan modern bir tünel platformudur.
+    </p>
+</div>
+
 
                 <div class="hero-actions">
                     <a href="#links" class="btn-primary">
