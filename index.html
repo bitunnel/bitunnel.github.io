@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Bitunnel – Hızlı ve Güvenli Giriş Merkezi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Bitunnel, birden fazla web sitesine tek noktadan hızlı ve güvenli erişim sağlayan modern bir giriş merkezidir.">
+    <meta name="description" content="Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan, hızlı ve güvenli bağlantı merkezidir.">
     <link rel="canonical" href="https://bitunnel.github.io/">
 
     <!-- Open Graph -->
@@ -222,43 +222,41 @@
     }
 
     /* Tünel kartı – içi koyu, sadece çerçeve renkli */
-.tunnel-card {
-    position: relative;
-    border-radius: 18px;
-    padding: 16px 18px 18px;
+    .tunnel-card {
+        position: relative;
+        border-radius: 18px;
+        padding: 16px 18px 18px;
+        background:
+            linear-gradient(145deg, #020617, #050816) padding-box,
+            linear-gradient(135deg,
+                #8b5cf6,
+                #4f46e5,
+                #3b82f6,
+                #22c55e,
+                #4f46e5
+            ) border-box;
+        border: 1px solid transparent;
+        background-size: 120% 120%, 260% 260%;
+        box-shadow: 0 20px 40px rgba(15,23,42,0.8);
+        animation: tunnelGlow 14s ease infinite;
+    }
 
-    /* iç kısım koyu, border gradient */
-    background:
-        linear-gradient(145deg, #020617, #050816) padding-box,
-        linear-gradient(135deg,
-            #8b5cf6,
-            #4f46e5,
-            #3b82f6,
-            #22c55e,
-            #4f46e5
-        ) border-box;
-    border: 1px solid transparent;
+    .tunnel-card::before {
+        content: none;
+    }
 
-    background-size: 120% 120%, 260% 260%;
-    box-shadow: 0 20px 40px rgba(15,23,42,0.8);
+    /* Hafif dönen ışık efekti */
+    @keyframes tunnelGlow {
+        0%   { background-position: 0% 0%, 0% 0%; }
+        50%  { background-position: 80% 60%, 60% 80%; }
+        100% { background-position: 0% 0%, 0% 0%; }
+    }
 
-    animation: tunnelGlow 14s ease infinite;
-}
-
-/* Artık ekstra arka plan ışığı yok */
-.tunnel-card::before {
-    content: none;
-}
-
-
-
-/* ✔ Hafif dönen ışık efekti (yumuşak, rahatsız etmeyecek animasyon) */
-@keyframes tunnelGlow {
-    0%   { background-position: 0% 0%, 0% 0%; }
-    50%  { background-position: 80% 60%, 60% 80%; }
-    100% { background-position: 0% 0%, 0% 0%; }
-}
-
+    @media (prefers-reduced-motion: reduce) {
+        .tunnel-card {
+            animation: none;
+        }
+    }
 
     /* İçerik, glow'un üstünde */
     .tunnel-intro,
@@ -328,7 +326,6 @@
         .tunnel-steps {
             grid-template-columns: 1fr;
         }
-
         .tunnel-card {
             padding: 14px 12px 16px;
         }
@@ -347,10 +344,16 @@
         align-items: center;
         gap: 8px;
         box-shadow: 0 14px 30px rgba(88,80,236,0.6);
+        transition: all .15s ease-out;
     }
 
     .btn-primary span.icon {
         font-size: 16px;
+    }
+
+    .btn-primary:hover {
+        box-shadow: 0 18px 40px rgba(88,80,236,0.85);
+        transform: translateY(-1px);
     }
 
     .btn-ghost {
@@ -364,35 +367,39 @@
         align-items: center;
         gap: 8px;
         cursor: pointer;
+        transition: all .15s ease-out;
     }
 
-    /* Buton bloğu – hero-actions */
+    .btn-ghost:hover {
+        border-color: rgba(148,163,184,0.9);
+        color: #e5e7eb;
+    }
+
     .hero-actions {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
         margin-top: 18px;
-        max-width: 520px; /* üstteki metinle aynı genişlik */
+        max-width: 520px;
     }
 
-    /* Küçük ekranlarda butonlar yan yana, eşit genişlikte */
-@media (max-width: 640px) {
-    .hero-actions {
-        max-width: 100%;
-        flex-wrap: nowrap;      /* alt alta düşmesin */
-        gap: 8px;
-    }
+    /* Mobilde iki buton yan yana */
+    @media (max-width: 640px) {
+        .hero-actions {
+            max-width: 100%;
+            flex-wrap: nowrap;
+            gap: 8px;
+        }
 
-    .hero-actions a,
-    .hero-actions button {
-        flex: 1;               /* her buton yarım satır kaplasın */
-        min-width: 0;
-        justify-content: center;
-        text-align: center;
-        white-space: nowrap;    /* yazı tek satır kalsın */
+        .hero-actions a,
+        .hero-actions button {
+            flex: 1;
+            min-width: 0;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+        }
     }
-}
-
 
     .hero-meta {
         display: flex;
@@ -401,7 +408,7 @@
         font-size: 11px;
         color: var(--text-muted);
         margin-top: 8px;
-        max-width: 520px; /* hizalı dursun */
+        max-width: 520px;
     }
 
     .hero-meta span {
@@ -536,6 +543,10 @@
         background: linear-gradient(135deg, #22c55e, #16a34a);
     }
 
+    .category-pill-favorites.active {
+        background: linear-gradient(135deg, #facc15, #f97316);
+    }
+
     .link-list {
         display: flex;
         flex-direction: column;
@@ -601,11 +612,32 @@
         cursor: pointer;
         white-space: nowrap;
         color: var(--text);
+        transition: all .12s ease-out;
     }
 
     .link-button span.icon {
         font-size: 14px;
         margin-left: 4px;
+    }
+
+    .link-button:hover {
+        border-color: rgba(148,163,184,0.95);
+    }
+
+    /* Favori butonu */
+    .fav-toggle {
+        padding-inline: 8px;
+    }
+
+    .fav-toggle .icon {
+        margin-left: 0;
+        font-size: 14px;
+    }
+
+    .fav-toggle.active {
+        color: #facc15;
+        border-color: rgba(250,204,21,0.85);
+        background: radial-gradient(circle at 0 0, rgba(250,204,21,0.25), rgba(15,23,42,1) 55%);
     }
 
     .link-note {
@@ -649,6 +681,23 @@
         box-shadow: 0 18px 40px rgba(148,163,184,0.4);
     }
 
+    body.light-theme .tunnel-card {
+        background:
+            #ffffff padding-box,
+            linear-gradient(135deg,
+                #8b5cf6,
+                #4f46e5,
+                #22c55e
+            ) border-box;
+        box-shadow: 0 18px 40px rgba(148,163,184,0.35);
+    }
+
+    body.light-theme .tunnel-step {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+        box-shadow: 0 8px 22px rgba(148,163,184,0.35);
+    }
+
     body.light-theme .search-input {
         background: #f3f4f6;
         border-color: #d1d5db;
@@ -688,20 +737,27 @@
         border-color: #e5e7eb;
         color: #4b5563;
     }
-</style>
+
+    .btn-primary:focus-visible,
+    .btn-ghost:focus-visible,
+    .link-button:focus-visible,
+    .category-pill:focus-visible {
+        outline: 2px solid #22c55e;
+        outline-offset: 2px;
+    }
+    </style>
 
 </head>
 <body>
 <div class="page">
     <header>
-        <a href="./" class="brand" aria-label="Bitunnel logo ve başlık" style="text-decoration:none;">
+        <a href="./" class="brand" aria-label="Bitunnel logo ve başlık">
             <div class="logo">B</div>
             <div class="brand-text">
-            <strong>Bitunnel</strong>
-            <span>Hızlı ve güvenli giriş merkezi</span>
+                <strong>Bitunnel</strong>
+                <span>Hızlı ve güvenli giriş merkezi</span>
             </div>
         </a>
-
 
         <div class="header-right">
             <div class="status-pill" aria-label="Sistem durumu">
@@ -716,7 +772,7 @@
     </header>
 
     <main>
-        <!-- Sol taraf: Tanıtım -->
+        <!-- Hero -->
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-inner">
                 <div class="chip-row">
@@ -730,34 +786,32 @@
                 </h1>
 
                 <div class="tunnel-layout">
-    <div class="tunnel-card">
-        <div class="tunnel-intro">
-            Bitunnel, bahis casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan hafif ve kullanıcı uyumlu bir bağlantı merkezidir. Engellenen ya da yenilenen linkleri takip etmek zorunda kalmadan, her zaman güncel girişe aynı URL üzerinden ulaşırsınız.
-        </div>
+                    <div class="tunnel-card">
+                        <div class="tunnel-intro">
+                            Bitunnel, bahis casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan hafif ve kullanıcı uyumlu bir bağlantı merkezidir. Engellenen ya da yenilenen linkleri takip etmek zorunda kalmadan, her zaman güncel girişe aynı URL üzerinden ulaşırsınız.
+                        </div>
 
-        <div class="tunnel-steps">
-            <div class="tunnel-step">
-                <div class="step-icon">1</div>
-                <h3>Güncel giriş havuzu</h3>
-                <p>Farklı sağlayıcılara ait tüm güncel bahis ve casino giriş adresleri tek yerde toplanır; dağınık link takibiyle uğraşmazsınız.</p>
-            </div>
+                        <div class="tunnel-steps">
+                            <div class="tunnel-step">
+                                <div class="step-icon">1</div>
+                                <h3>Güncel giriş havuzu</h3>
+                                <p>Farklı sağlayıcılara ait tüm güncel bahis ve casino giriş adresleri tek yerde toplanır; dağınık link takibiyle uğraşmazsınız.</p>
+                            </div>
 
-            <div class="tunnel-step">
-                <div class="step-icon">2</div>
-                <h3>Akıllı tünel yönlendirme</h3>
-                <p>Bitunnel adresine gelir, kullanmak istediğiniz paneli seçersiniz. Sistem sizi anında doğru ve aktif giriş noktasına iletir.</p>
-            </div>
+                            <div class="tunnel-step">
+                                <div class="step-icon">2</div>
+                                <h3>Akıllı tünel yönlendirme</h3>
+                                <p>Bitunnel adresine gelir, kullanmak istediğiniz paneli seçersiniz. Sistem sizi anında doğru ve aktif giriş noktasına iletir.</p>
+                            </div>
 
-            <div class="tunnel-step">
-                <div class="step-icon">3</div>
-                <h3>Hızlı ve güvenli erişim</h3>
-                <p>Ek yazılım, ağır script ve takipçi olmadan, tek HTML tabanlı hafif arayüzle temiz, hızlı ve güvenli bir bağlantı deneyimi yaşarsınız.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-
+                            <div class="tunnel-step">
+                                <div class="step-icon">3</div>
+                                <h3>Hızlı ve güvenli erişim</h3>
+                                <p>Ek yazılım, ağır script ve takipçi olmadan, tek HTML tabanlı hafif arayüzle temiz, hızlı ve güvenli bir bağlantı deneyimi yaşarsınız.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="hero-actions">
                     <a href="#links" class="btn-primary">
@@ -776,7 +830,7 @@
             </div>
         </section>
 
-        <!-- Sağ taraf: Link paneli -->
+        <!-- Link paneli -->
         <section class="link-panel" id="links" aria-labelledby="links-title">
             <div class="panel-header">
                 <div>
@@ -792,21 +846,20 @@
             <!-- Arama kutusu -->
             <div class="search-wrapper">
                 <div class="search-box">
-                <span class="search-icon">🔍</span>
-            <input
-                id="link-search"
-                class="search-input"
-                type="text"
-                placeholder="Linklerde ara (isim, adres veya etiket)..."
-            >
+                    <span class="search-icon">🔍</span>
+                    <input
+                        id="link-search"
+                        class="search-input"
+                        type="text"
+                        placeholder="Linklerde ara (isim, adres veya etiket)..."
+                    >
+                </div>
             </div>
-        </div>
 
-
-            <!-- Kategori sekmeleri (JS ile doldurulacak) -->
+            <!-- Kategori sekmeleri -->
             <div class="category-row" id="category-row"></div>
 
-            <!-- Link listesi (JS ile doldurulacak) -->
+            <!-- Link listesi -->
             <div class="link-list" id="link-list"></div>
 
             <p class="link-note">
@@ -824,7 +877,7 @@
 
 <script>
     /*************************************************
-     * 1) GENEL AYARLAR (YILI YAZ, TEMA VS.)
+     * 1) GENEL AYARLAR (YIL, TEMA)
      *************************************************/
     document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -850,31 +903,41 @@
     });
 
     /*************************************************
-     * 2) KONFİG – SADECE BURAYI DÜZENLEYEREK
-     *    TÜM LİSTELERİ VE KATEGORİLERİ YÖNETEBİLİRSİN
+     * 2) KONFİG
      *************************************************/
+    const FAVORITES_KEY = "bitunnel-favorites";
 
-    // Kategoriler (Hepsi varsayılan, burada yazdıkların buton olarak görünür)
+    // Eski favorileri localStorage'dan oku
+    let favorites = new Set();
+    try {
+        const storedFavs = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+        if (Array.isArray(storedFavs)) {
+            favorites = new Set(storedFavs);
+        }
+    } catch (e) {
+        favorites = new Set();
+    }
+
+    // Kategoriler
     const CATEGORIES = [
         { id: "popular", label: "Popüler", icon: "🌟", pillClass: "category-pill-popular" },
         { id: "betconstruct", label: "BetConstruct", icon: "🎛", pillClass: "category-pill-betconstruct" },
         { id: "pronet", label: "Pronet Gaming", icon: "🎮", pillClass: "category-pill-pronet" }
     ];
 
-    // Linkler – BURAYA KENDİ SİTELERİNİ YAZ
-    // category: popular | betconstruct | pronet
+    // Linkler – URL'ler benzersiz olmalı (favori için anahtar olarak kullanıyoruz)
     const LINKS = [
-        // POPÜLER 3 ADET
+        // POPÜLER
         { label: "Popüler Site 1", url: "https://populer1.example", tag: "Popüler", category: "popular" },
         { label: "Popüler Site 2", url: "https://populer2.example", tag: "Popüler", category: "popular" },
         { label: "Popüler Site 3", url: "https://populer3.example", tag: "Popüler", category: "popular" },
 
-        // BETCONSTRUCT 3 ADET
+        // BETCONSTRUCT
         { label: "BetConstruct Panel 1", url: "https://bc-panel1.example", tag: "BetConstruct", category: "betconstruct" },
         { label: "BetConstruct Panel 2", url: "https://bc-panel2.example", tag: "BetConstruct", category: "betconstruct" },
         { label: "BetConstruct Panel 3", url: "https://bc-panel3.example", tag: "BetConstruct", category: "betconstruct" },
 
-        // PRONET 3 ADET
+        // PRONET
         { label: "Pronet Gaming Site 1", url: "https://pronet1.example", tag: "Pronet Gaming", category: "pronet" },
         { label: "Pronet Gaming Site 2", url: "https://pronet2.example", tag: "Pronet Gaming", category: "pronet" },
         { label: "Pronet Gaming Site 3", url: "https://pronet3.example", tag: "Pronet Gaming", category: "pronet" }
@@ -887,22 +950,35 @@
     const linkList = document.getElementById("link-list");
     const searchInput = document.getElementById("link-search");
 
-    let currentCategory = "all";
+    // Favorisi varsa, sayfa favoriler filtresiyle açılsın
+    let currentCategory = favorites.size > 0 ? "favorites" : "all";
 
-    // Kategori butonlarını oluştur
+    function saveFavorites() {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
+    }
+
+    // Kategori butonları
     function renderCategories() {
         const frag = document.createDocumentFragment();
 
-        // "Hepsi" butonu
+        // Hepsi
         const allBtn = document.createElement("button");
-        allBtn.className = "category-pill active";
+        allBtn.className = "category-pill" + (currentCategory === "all" ? " active" : "");
         allBtn.dataset.filter = "all";
         allBtn.innerHTML = '<span class="icon">✨</span><span>Hepsi</span>';
         frag.appendChild(allBtn);
 
+        // Favoriler
+        const favBtn = document.createElement("button");
+        favBtn.className = "category-pill category-pill-favorites" + (currentCategory === "favorites" ? " active" : "");
+        favBtn.dataset.filter = "favorites";
+        favBtn.innerHTML = '<span class="icon">⭐</span><span>Favoriler</span>';
+        frag.appendChild(favBtn);
+
+        // Diğer kategoriler
         CATEGORIES.forEach(cat => {
             const btn = document.createElement("button");
-            btn.className = "category-pill " + (cat.pillClass || "");
+            btn.className = "category-pill " + (cat.pillClass || "") + (currentCategory === cat.id ? " active" : "");
             btn.dataset.filter = cat.id;
             btn.innerHTML =
                 (cat.icon ? `<span class="icon">${cat.icon}</span>` : "") +
@@ -914,14 +990,17 @@
         categoryRow.appendChild(frag);
     }
 
-    // Linkleri oluştur
+    // Link listesi
     function renderLinks() {
         const frag = document.createDocumentFragment();
 
         LINKS.forEach(link => {
+            const isFav = favorites.has(link.url);
+
             const article = document.createElement("article");
             article.className = "link-item";
             article.dataset.category = link.category;
+            article.dataset.url = link.url;
 
             article.innerHTML = `
                 <div class="link-main">
@@ -943,6 +1022,12 @@
                         Kopyala
                         <span class="icon">⧉</span>
                     </button>
+                    <button class="link-button fav-toggle ${isFav ? "active" : ""}"
+                            type="button"
+                            data-url="${link.url}"
+                            aria-pressed="${isFav}">
+                        <span class="icon">${isFav ? "★" : "☆"}</span>
+                    </button>
                 </div>
             `;
             frag.appendChild(article);
@@ -956,37 +1041,62 @@
     renderLinks();
 
     /*************************************************
-     * 4) FİLTRELEME + KOPYALAMA
+     * 4) FİLTRELEME + KOPYALAMA + FAVORİ
      *************************************************/
     function applyFilters() {
         const query = (searchInput?.value || "").toLowerCase().trim();
         const items = linkList.querySelectorAll(".link-item");
 
+        let visibleCount = 0;
+
         items.forEach(item => {
             const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
-            const url = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
+            const url = item.dataset.url || "";
+            const urlText = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
             const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
             const category = item.dataset.category || "";
+            const isFav = favorites.has(url);
 
             const matchText =
                 !query ||
                 label.includes(query) ||
-                url.includes(query) ||
+                urlText.includes(query) ||
                 tag.includes(query);
 
-            const matchCategory =
-                currentCategory === "all" ||
-                currentCategory === category;
+            let matchCategory = false;
+            if (currentCategory === "all") {
+                matchCategory = true;
+            } else if (currentCategory === "favorites") {
+                matchCategory = isFav;
+            } else {
+                matchCategory = currentCategory === category;
+            }
 
-            item.style.display = (matchText && matchCategory) ? "flex" : "none";
+            const visible = matchText && matchCategory;
+            item.style.display = visible ? "flex" : "none";
+            if (visible) visibleCount++;
         });
+
+        // Boş sonuç mesajı
+        let emptyState = document.getElementById("empty-state");
+        if (!emptyState) {
+            emptyState = document.createElement("p");
+            emptyState.id = "empty-state";
+            emptyState.style.fontSize = "11px";
+            emptyState.style.color = "#9ca3af";
+            emptyState.style.marginTop = "6px";
+            linkList.after(emptyState);
+        }
+        emptyState.textContent = visibleCount === 0
+            ? "Aramanızla eşleşen bağlantı bulunamadı."
+            : "";
     }
 
     if (searchInput) {
         searchInput.addEventListener("input", applyFilters);
     }
 
-    // Kategori tıklamaları (event delegation)
+    // Kategori tıklamaları
     categoryRow.addEventListener("click", (e) => {
         const btn = e.target.closest(".category-pill");
         if (!btn) return;
@@ -1000,9 +1110,11 @@
         applyFilters();
     });
 
-    // Kopyala / Aç gibi aksiyonlar için event delegation
+    // Link aksiyonları (kopyala + favori)
     linkList.addEventListener("click", async (e) => {
         const copyBtn = e.target.closest(".copy-link");
+        const favBtn = e.target.closest(".fav-toggle");
+
         if (copyBtn) {
             const url = copyBtn.getAttribute("data-url");
             try {
@@ -1013,10 +1125,35 @@
             } catch (err) {
                 alert("Kopyalama desteklenmiyor, URL'yi elle seçip kopyalayabilirsin.");
             }
+            return;
+        }
+
+        if (favBtn) {
+            const url = favBtn.getAttribute("data-url");
+            const isNowFav = !favorites.has(url);
+
+            if (isNowFav) {
+                favorites.add(url);
+            } else {
+                favorites.delete(url);
+            }
+            saveFavorites();
+
+            favBtn.classList.toggle("active", isNowFav);
+            favBtn.setAttribute("aria-pressed", isNowFav ? "true" : "false");
+            const iconSpan = favBtn.querySelector(".icon");
+            if (iconSpan) {
+                iconSpan.textContent = isNowFav ? "★" : "☆";
+            }
+
+            // Favoriler filtresindeysek, listeyi güncelle
+            if (currentCategory === "favorites") {
+                applyFilters();
+            }
         }
     });
 
-    // Sayfa ilk açıldığında filtre uygula
+    // İlk yüklemede filtre uygula
     applyFilters();
 </script>
 </body>
