@@ -8,14 +8,13 @@
     <meta name="keywords" content="bitunnel, giriş merkezi, link hub, hızlı erişim, çoklu site girişi">
     <link rel="canonical" href="https://bitunnel.github.io/">
 
-    <!-- Open Graph (sosyal medya önizleme) -->
+    <!-- Open Graph -->
     <meta property="og:title" content="Bitunnel – Hızlı ve Güvenli Giriş Merkezi">
     <meta property="og:description" content="Birden fazla siteye tek yerden hızlı ve güvenli erişim sağlayan modern bağlantı merkezi.">
     <meta property="og:url" content="https://bitunnel.github.io/">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Bitunnel">
 
-    <!-- Basit ve hızlı dahili stil -->
     <style>
         :root {
             --bg: #050816;
@@ -26,7 +25,6 @@
             --text: #f9fafb;
             --text-muted: #9ca3af;
             --border-soft: rgba(148,163,184,0.25);
-            --danger: #ef4444;
             --shadow-soft: 0 22px 45px rgba(15,23,42,0.65);
             --radius-xl: 18px;
             --radius-lg: 14px;
@@ -304,11 +302,30 @@
             background: var(--accent-strong);
         }
 
+        .search-wrapper {
+            margin-top: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.65);
+            background: rgba(15,23,42,0.9);
+            color: #e5e7eb;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #6b7280;
+        }
+
         .link-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-top: 8px;
+            margin-top: 12px;
         }
 
         .link-item {
@@ -326,6 +343,7 @@
             display: flex;
             flex-direction: column;
             gap: 3px;
+            min-width: 0;
         }
 
         .link-label {
@@ -349,6 +367,13 @@
             align-self: flex-start;
         }
 
+        .link-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
         .link-button {
             display: inline-flex;
             align-items: center;
@@ -360,6 +385,7 @@
             font-size: 12px;
             cursor: pointer;
             white-space: nowrap;
+            color: var(--text);
         }
 
         .link-button span.icon {
@@ -414,7 +440,7 @@
     </header>
 
     <main>
-        <!-- Sol taraf: Tanıtım alanı -->
+        <!-- Sol taraf: Tanıtım -->
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-inner">
                 <div class="chip-row">
@@ -450,7 +476,7 @@
             </div>
         </section>
 
-        <!-- Sağ taraf: Link listesi -->
+        <!-- Sağ taraf: Link paneli -->
         <section class="link-panel" id="links" aria-labelledby="links-title">
             <div class="panel-header">
                 <div>
@@ -463,18 +489,38 @@
                 </div>
             </div>
 
+            <!-- Arama kutusu -->
+            <div class="search-wrapper">
+                <input
+                    id="link-search"
+                    class="search-input"
+                    type="text"
+                    placeholder="Linklerde ara (isim, adres veya etiket)...">
+            </div>
+
+            <!-- Link listesi -->
             <div class="link-list">
-                <!-- ÖRNEK 1 – burayı kendi URL'lerinle değiştir -->
+                <!-- ÖRNEK 1 – BURAYI KENDİ URL'LERİNLE DEĞİŞTİR -->
                 <article class="link-item">
                     <div class="link-main">
                         <div class="link-label">Yönetim Paneli</div>
                         <div class="link-url">https://ornek-yonetim-paneli.com/login</div>
                         <span class="link-tag">Admin • SSL</span>
                     </div>
-                    <a class="link-button" href="https://ornek-yonetim-paneli.com/login" target="_blank" rel="noopener">
-                        Aç
-                        <span class="icon">↗</span>
-                    </a>
+                    <div class="link-actions">
+                        <a class="link-button open-link"
+                           href="https://ornek-yonetim-paneli.com/login"
+                           target="_blank"
+                           rel="noopener">
+                            Aç
+                            <span class="icon">↗</span>
+                        </a>
+                        <button class="link-button copy-link" type="button"
+                                data-url="https://ornek-yonetim-paneli.com/login">
+                            Kopyala
+                            <span class="icon">📋</span>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- ÖRNEK 2 -->
@@ -484,10 +530,20 @@
                         <div class="link-url">https://destek.ornekdomain.com</div>
                         <span class="link-tag">Support</span>
                     </div>
-                    <a class="link-button" href="https://destek.ornekdomain.com" target="_blank" rel="noopener">
-                        Aç
-                        <span class="icon">↗</span>
-                    </a>
+                    <div class="link-actions">
+                        <a class="link-button open-link"
+                           href="https://destek.ornekdomain.com"
+                           target="_blank"
+                           rel="noopener">
+                            Aç
+                            <span class="icon">↗</span>
+                        </a>
+                        <button class="link-button copy-link" type="button"
+                                data-url="https://destek.ornekdomain.com">
+                            Kopyala
+                            <span class="icon">📋</span>
+                        </button>
+                    </div>
                 </article>
 
                 <!-- ÖRNEK 3 -->
@@ -497,10 +553,20 @@
                         <div class="link-url">https://analytics.ornek.com/dashboard</div>
                         <span class="link-tag">İstatistik</span>
                     </div>
-                    <a class="link-button" href="https://analytics.ornek.com/dashboard" target="_blank" rel="noopener">
-                        Aç
-                        <span class="icon">↗</span>
-                    </a>
+                    <div class="link-actions">
+                        <a class="link-button open-link"
+                           href="https://analytics.ornek.com/dashboard"
+                           target="_blank"
+                           rel="noopener">
+                            Aç
+                            <span class="icon">↗</span>
+                        </a>
+                        <button class="link-button copy-link" type="button"
+                                data-url="https://analytics.ornek.com/dashboard">
+                            Kopyala
+                            <span class="icon">📋</span>
+                        </button>
+                    </div>
                 </article>
             </div>
 
@@ -518,8 +584,48 @@
 </div>
 
 <script>
-    // Yılda bir kez bile güncellemekle uğraşmayalım 🙂
+    // Yıl otomatik
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // 🔍 Arama / filtreleme
+    const searchInput = document.getElementById("link-search");
+    const linkItems = document.querySelectorAll(".link-item");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+
+            linkItems.forEach(function (item) {
+                const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
+                const url = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
+                const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
+
+                const match =
+                    label.includes(query) ||
+                    url.includes(query) ||
+                    tag.includes(query);
+
+                item.style.display = match ? "flex" : "none";
+            });
+        });
+    }
+
+    // 📋 Link kopyalama
+    const copyButtons = document.querySelectorAll(".copy-link");
+
+    copyButtons.forEach(function (btn) {
+        btn.addEventListener("click", async function () {
+            const url = this.getAttribute("data-url");
+            try {
+                await navigator.clipboard.writeText(url);
+                const originalText = this.textContent.trim();
+                this.textContent = "Kopyalandı!";
+                setTimeout(() => { this.textContent = originalText; }, 1500);
+            } catch (e) {
+                alert("Kopyalama desteklenmiyor, URL'yi elle seçip kopyalayabilirsin.");
+            }
+        });
+    });
 </script>
 </body>
 </html>
