@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Bitunnel – Hızlı ve Güvenli Giriş Merkezi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan, hızlı ve güvenli bağlantı merkezidir.">
+    <meta name="description" content="Bitunnel, bahis casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan, hızlı ve güvenli bağlantı merkezidir.">
     <link rel="canonical" href="https://bitunnel.github.io/">
 
     <!-- Open Graph -->
@@ -668,75 +668,189 @@
         text-underline-offset: 3px;
     }
 
-    /* AÇIK TEMA */
-    body.light-theme {
-        background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 40%, #e5e7eb 100%);
-        color: #111827;
-    }
+    /* ============ AÇIK TEMA (LIGHT THEME) ============ */
 
-    body.light-theme .hero,
-    body.light-theme .link-panel {
-        background: #ffffff;
-        border-color: rgba(209,213,219,0.9);
-        box-shadow: 0 18px 40px rgba(148,163,184,0.4);
-    }
+body.light-theme {
+    background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 40%, #e5e7eb 100%);
+    color: #111827;
+}
 
-    body.light-theme .tunnel-card {
-        background:
-            #ffffff padding-box,
-            linear-gradient(135deg,
-                #8b5cf6,
-                #4f46e5,
-                #22c55e
-            ) border-box;
-        box-shadow: 0 18px 40px rgba(148,163,184,0.35);
-    }
+/* Kartlar: hero + link panel */
+body.light-theme .hero,
+body.light-theme .link-panel {
+    background: linear-gradient(135deg, #ffffff, #f9fafb);
+    border-color: rgba(209,213,219,0.9);
+    box-shadow: 0 18px 40px rgba(148,163,184,0.25);
+}
 
-    body.light-theme .tunnel-step {
-        background: #f9fafb;
-        border-color: #e5e7eb;
-        box-shadow: 0 8px 22px rgba(148,163,184,0.35);
-    }
+/* Tünel kartı ve adımlar */
+body.light-theme .tunnel-card {
+    background:
+        linear-gradient(135deg, #ffffff, #f9fafb) padding-box,
+        linear-gradient(135deg, #8b5cf6, #4f46e5, #22c55e) border-box;
+    border-color: transparent;
+    box-shadow: 0 12px 28px rgba(148,163,184,0.35);
+}
 
-    body.light-theme .search-input {
-        background: #f3f4f6;
-        border-color: #d1d5db;
-        color: #111827;
-    }
+body.light-theme .tunnel-intro {
+    color: #4b5563;
+}
 
-    body.light-theme .category-pill {
-        background: #f3f4f6;
-        border-color: #d1d5db;
-        color: #4b5563;
-    }
+body.light-theme .tunnel-step {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    box-shadow: 0 10px 24px rgba(148,163,184,0.25);
+}
 
-    body.light-theme .category-pill.active {
-        color: #f9fafb;
-    }
+body.light-theme .tunnel-step h3 {
+    color: #111827;
+}
 
-    body.light-theme .link-item {
-        background: #f9fafb;
-        border-color: #e5e7eb;
-    }
+body.light-theme .tunnel-step p {
+    color: #4b5563;
+}
 
-    body.light-theme .link-url {
-        color: #6b7280;
-    }
+/* Hero metin + chipler */
+body.light-theme h1 span.accent {
+    /* gradient aynı kalsın, sadece açık fonda daha belirgin */
+    filter: saturate(1.1);
+}
 
-    body.light-theme .link-note {
-        color: #6b7280;
-    }
+body.light-theme .chip {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #4b5563;
+}
 
-    body.light-theme footer {
-        border-color: #e5e7eb;
-        color: #6b7280;
-    }
+/* Butonlar */
+body.light-theme .btn-primary {
+    box-shadow: 0 12px 22px rgba(129,140,248,0.45);
+    color: #ffffff;
+}
 
-    body.light-theme .theme-toggle {
-        background: #f9fafb;
-        border-color: #e5e7eb;
-        color: #4b5563;
-    }
+body.light-theme .btn-ghost {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #374151;
+}
+
+/* Hero altındaki küçük metinler */
+body.light-theme .hero-meta {
+    color: #6b7280;
+}
+
+body.light-theme .hero-meta span strong {
+    color: #111827;
+}
+
+/* Arama kutusu */
+body.light-theme .search-input {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #111827;
+}
+
+body.light-theme .search-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Kategori pill’leri */
+body.light-theme .category-pill {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #4b5563;
+}
+
+body.light-theme .category-pill .icon {
+    color: inherit;
+}
+
+/* Aktif olanlar yine renkli kalsın ama yazılar net olsun */
+body.light-theme .category-pill.active {
+    color: #f9fafb;
+    border-color: transparent;
+}
+
+/* Favoriler için hafif altın tonu */
+body.light-theme .category-pill-favorites.active {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+}
+
+/* Link listesi kartları */
+body.light-theme .link-item {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    box-shadow: 0 10px 20px rgba(148,163,184,0.2);
+}
+
+body.light-theme .link-label {
+    color: #111827;
+}
+
+body.light-theme .link-url {
+    color: #6b7280;
+}
+
+/* Etiket */
+body.light-theme .link-tag {
+    background: #e0f2fe;
+    border-color: #7dd3fc;
+    color: #0369a1;
+}
+
+/* Link butonları */
+body.light-theme .link-button {
+    background: radial-gradient(circle at 0 0, rgba(148,163,184,0.3) 0, #111827 55%);
+    border-color: rgba(55,65,81,0.35);
+    color: #f9fafb;
+}
+
+/* Favori butonu aktif/pasif */
+body.light-theme .fav-toggle {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #f59e0b;
+}
+
+body.light-theme .fav-toggle.active {
+    background: #f59e0b;
+    border-color: #d97706;
+    color: #ffffff;
+}
+
+/* Panel badge / status pill / tema butonu */
+body.light-theme .panel-badge {
+    background: rgba(129,140,248,0.08);
+    border-color: rgba(129,140,248,0.7);
+    color: #4f46e5;
+}
+
+body.light-theme .panel-badge-dot {
+    background: #4f46e5;
+}
+
+body.light-theme .status-pill {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.35);
+    color: #047857;
+}
+
+body.light-theme .status-dot {
+    box-shadow: 0 0 0 6px rgba(34,197,94,0.25);
+}
+
+body.light-theme .theme-toggle {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    color: #4b5563;
+}
+
+/* Footer */
+body.light-theme footer {
+    border-color: #e5e7eb;
+    color: #6b7280;
+}
+
 
     .btn-primary:focus-visible,
     .btn-ghost:focus-visible,
