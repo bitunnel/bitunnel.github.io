@@ -359,12 +359,31 @@
             background: rgba(15,23,42,0.9);
             color: var(--text-muted);
             cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .category-pill .icon {
+            font-size: 13px;
         }
 
         .category-pill.active {
             background: radial-gradient(circle at 0 0, rgba(79,70,229,0.9) 0, rgba(37,99,235,1) 55%);
             color: #e5e7eb;
             border-color: rgba(129,140,248,0.9);
+        }
+
+        .category-pill-popular.active {
+            background: linear-gradient(135deg, #f59e0b, #f97316);
+        }
+
+        .category-pill-betconstruct.active {
+            background: linear-gradient(135deg, #06b6d4, #0ea5e9);
+        }
+
+        .category-pill-pronet.active {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
         }
 
         .link-list {
@@ -493,9 +512,7 @@
         }
 
         body.light-theme .category-pill.active {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
             color: #f9fafb;
-            border-color: #4f46e5;
         }
 
         body.light-theme .link-item {
@@ -605,109 +622,11 @@
                     placeholder="Linklerde ara (isim, adres veya etiket)...">
             </div>
 
-            <!-- Kategori sekmeleri -->
-            <div class="category-row">
-                <button class="category-pill active" data-filter="all">Hepsi</button>
-                <button class="category-pill" data-filter="panel">Paneller</button>
-                <button class="category-pill" data-filter="support">Destek</button>
-                <button class="category-pill" data-filter="report">Raporlama</button>
-                <button class="category-pill" data-filter="other">Diğer</button>
-            </div>
+            <!-- Kategori sekmeleri (JS ile doldurulacak) -->
+            <div class="category-row" id="category-row"></div>
 
-            <!-- Link listesi -->
-            <div class="link-list">
-                <!-- ÖRNEK 1 – KENDİ URL'İNLE DEĞİŞTİR -->
-                <article class="link-item" data-category="panel">
-                    <div class="link-main">
-                        <div class="link-label">Yönetim Paneli</div>
-                        <div class="link-url">https://ornek-yonetim-paneli.com/login</div>
-                        <span class="link-tag">Admin • SSL</span>
-                    </div>
-                    <div class="link-actions">
-                        <a class="link-button open-link"
-                           href="https://ornek-yonetim-paneli.com/login"
-                           target="_blank"
-                           rel="noopener">
-                            Aç
-                            <span class="icon">↗</span>
-                        </a>
-                        <button class="link-button copy-link" type="button"
-                                data-url="https://ornek-yonetim-paneli.com/login">
-                            Kopyala
-                            <span class="icon">📋</span>
-                        </button>
-                    </div>
-                </article>
-
-                <!-- ÖRNEK 2 -->
-                <article class="link-item" data-category="support">
-                    <div class="link-main">
-                        <div class="link-label">Müşteri Destek Sistemi</div>
-                        <div class="link-url">https://destek.ornekdomain.com</div>
-                        <span class="link-tag">Support</span>
-                    </div>
-                    <div class="link-actions">
-                        <a class="link-button open-link"
-                           href="https://destek.ornekdomain.com"
-                           target="_blank"
-                           rel="noopener">
-                            Aç
-                            <span class="icon">↗</span>
-                        </a>
-                        <button class="link-button copy-link" type="button"
-                                data-url="https://destek.ornekdomain.com">
-                            Kopyala
-                            <span class="icon">📋</span>
-                        </button>
-                    </div>
-                </article>
-
-                <!-- ÖRNEK 3 -->
-                <article class="link-item" data-category="report">
-                    <div class="link-main">
-                        <div class="link-label">Raporlama / Analitik</div>
-                        <div class="link-url">https://analytics.ornek.com/dashboard</div>
-                        <span class="link-tag">İstatistik</span>
-                    </div>
-                    <div class="link-actions">
-                        <a class="link-button open-link"
-                           href="https://analytics.ornek.com/dashboard"
-                           target="_blank"
-                           rel="noopener">
-                            Aç
-                            <span class="icon">↗</span>
-                        </a>
-                        <button class="link-button copy-link" type="button"
-                                data-url="https://analytics.ornek.com/dashboard">
-                            Kopyala
-                            <span class="icon">📋</span>
-                        </button>
-                    </div>
-                </article>
-
-                <!-- ÖRNEK 4 -->
-                <article class="link-item" data-category="other">
-                    <div class="link-main">
-                        <div class="link-label">Doküman Deposu</div>
-                        <div class="link-url">https://docs.ornek.com</div>
-                        <span class="link-tag">Belgeler</span>
-                    </div>
-                    <div class="link-actions">
-                        <a class="link-button open-link"
-                           href="https://docs.ornek.com"
-                           target="_blank"
-                           rel="noopener">
-                            Aç
-                            <span class="icon">↗</span>
-                        </a>
-                        <button class="link-button copy-link" type="button"
-                                data-url="https://docs.ornek.com">
-                            Kopyala
-                            <span class="icon">📋</span>
-                        </button>
-                    </div>
-                </article>
-            </div>
+            <!-- Link listesi (JS ile doldurulacak) -->
+            <div class="link-list" id="link-list"></div>
 
             <p class="link-note">
                 Bu listede gördüğünüz bağlantılar tamamen <span>sizin kontrolünüzdedir</span>.
@@ -723,10 +642,11 @@
 </div>
 
 <script>
-    // Yıl otomatik
+    /*************************************************
+     * 1) GENEL AYARLAR (YILI YAZ, TEMA VS.)
+     *************************************************/
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // Tema yönetimi
     const themeToggle = document.getElementById("theme-toggle");
     const themeIcon = document.getElementById("theme-icon");
     const themeLabel = document.getElementById("theme-label");
@@ -740,33 +660,132 @@
         themeLabel.textContent = isLight ? "Karanlık temaya geç" : "Açık temaya geç";
     }
 
-    // Kaydedilmiş tema varsa uygula
     const savedTheme = localStorage.getItem(THEME_KEY);
-    if (savedTheme === "light") {
-        applyTheme("light");
-    } else {
-        applyTheme("dark");
-    }
+    applyTheme(savedTheme === "light" ? "light" : "dark");
 
     themeToggle.addEventListener("click", () => {
         const newTheme = document.body.classList.contains("light-theme") ? "dark" : "light";
         applyTheme(newTheme);
     });
 
-    // Arama / kategori filtreleme
+    /*************************************************
+     * 2) KONFİG – SADECE BURAYI DÜZENLEYEREK
+     *    TÜM LİSTELERİ VE KATEGORİLERİ YÖNETEBİLİRSİN
+     *************************************************/
+
+    // Kategoriler (Hepsi varsayılan, burada yazdıkların buton olarak görünür)
+    const CATEGORIES = [
+        { id: "popular", label: "Popüler", icon: "🌟", pillClass: "category-pill-popular" },
+        { id: "betconstruct", label: "BetConstruct", icon: "🎛", pillClass: "category-pill-betconstruct" },
+        { id: "pronet", label: "Pronet Gaming", icon: "🎮", pillClass: "category-pill-pronet" }
+    ];
+
+    // Linkler – BURAYA KENDİ SİTELERİNİ YAZ
+    // category: popular | betconstruct | pronet
+    const LINKS = [
+        // POPÜLER 3 ADET
+        { label: "Popüler Site 1", url: "https://populer1.example", tag: "Popüler", category: "popular" },
+        { label: "Popüler Site 2", url: "https://populer2.example", tag: "Popüler", category: "popular" },
+        { label: "Popüler Site 3", url: "https://populer3.example", tag: "Popüler", category: "popular" },
+
+        // BETCONSTRUCT 3 ADET
+        { label: "BetConstruct Panel 1", url: "https://bc-panel1.example", tag: "BetConstruct", category: "betconstruct" },
+        { label: "BetConstruct Panel 2", url: "https://bc-panel2.example", tag: "BetConstruct", category: "betconstruct" },
+        { label: "BetConstruct Panel 3", url: "https://bc-panel3.example", tag: "BetConstruct", category: "betconstruct" },
+
+        // PRONET 3 ADET
+        { label: "Pronet Gaming Site 1", url: "https://pronet1.example", tag: "Pronet Gaming", category: "pronet" },
+        { label: "Pronet Gaming Site 2", url: "https://pronet2.example", tag: "Pronet Gaming", category: "pronet" },
+        { label: "Pronet Gaming Site 3", url: "https://pronet3.example", tag: "Pronet Gaming", category: "pronet" }
+    ];
+
+    /*************************************************
+     * 3) ARAYÜZÜ DİNAMİK OLARAK OLUŞTUR
+     *************************************************/
+    const categoryRow = document.getElementById("category-row");
+    const linkList = document.getElementById("link-list");
     const searchInput = document.getElementById("link-search");
-    const linkItems = document.querySelectorAll(".link-item");
-    const categoryButtons = document.querySelectorAll(".category-pill");
+
     let currentCategory = "all";
 
+    // Kategori butonlarını oluştur
+    function renderCategories() {
+        const frag = document.createDocumentFragment();
+
+        // "Hepsi" butonu
+        const allBtn = document.createElement("button");
+        allBtn.className = "category-pill active";
+        allBtn.dataset.filter = "all";
+        allBtn.innerHTML = '<span class="icon">✨</span><span>Hepsi</span>';
+        frag.appendChild(allBtn);
+
+        CATEGORIES.forEach(cat => {
+            const btn = document.createElement("button");
+            btn.className = "category-pill " + (cat.pillClass || "");
+            btn.dataset.filter = cat.id;
+            btn.innerHTML =
+                (cat.icon ? `<span class="icon">${cat.icon}</span>` : "") +
+                `<span>${cat.label}</span>`;
+            frag.appendChild(btn);
+        });
+
+        categoryRow.innerHTML = "";
+        categoryRow.appendChild(frag);
+    }
+
+    // Linkleri oluştur
+    function renderLinks() {
+        const frag = document.createDocumentFragment();
+
+        LINKS.forEach(link => {
+            const article = document.createElement("article");
+            article.className = "link-item";
+            article.dataset.category = link.category;
+
+            article.innerHTML = `
+                <div class="link-main">
+                    <div class="link-label">${link.label}</div>
+                    <div class="link-url">${link.url}</div>
+                    <span class="link-tag">${link.tag}</span>
+                </div>
+                <div class="link-actions">
+                    <a class="link-button open-link"
+                       href="${link.url}"
+                       target="_blank"
+                       rel="noopener">
+                        Aç
+                        <span class="icon">↗</span>
+                    </a>
+                    <button class="link-button copy-link"
+                            type="button"
+                            data-url="${link.url}">
+                        Kopyala
+                        <span class="icon">📋</span>
+                    </button>
+                </div>
+            `;
+            frag.appendChild(article);
+        });
+
+        linkList.innerHTML = "";
+        linkList.appendChild(frag);
+    }
+
+    renderCategories();
+    renderLinks();
+
+    /*************************************************
+     * 4) FİLTRELEME + KOPYALAMA
+     *************************************************/
     function applyFilters() {
         const query = (searchInput?.value || "").toLowerCase().trim();
+        const items = linkList.querySelectorAll(".link-item");
 
-        linkItems.forEach(function (item) {
+        items.forEach(item => {
             const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
             const url = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
             const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
-            const category = item.getAttribute("data-category") || "other";
+            const category = item.dataset.category || "";
 
             const matchText =
                 !query ||
@@ -786,31 +805,38 @@
         searchInput.addEventListener("input", applyFilters);
     }
 
-    categoryButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
-            categoryButtons.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            currentCategory = btn.getAttribute("data-filter") || "all";
-            applyFilters();
-        });
+    // Kategori tıklamaları (event delegation)
+    categoryRow.addEventListener("click", (e) => {
+        const btn = e.target.closest(".category-pill");
+        if (!btn) return;
+
+        const filter = btn.dataset.filter || "all";
+        currentCategory = filter;
+
+        categoryRow.querySelectorAll(".category-pill").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        applyFilters();
     });
 
-    // Kopyala
-    const copyButtons = document.querySelectorAll(".copy-link");
-
-    copyButtons.forEach(function (btn) {
-        btn.addEventListener("click", async function () {
-            const url = this.getAttribute("data-url");
+    // Kopyala / Aç gibi aksiyonlar için event delegation
+    linkList.addEventListener("click", async (e) => {
+        const copyBtn = e.target.closest(".copy-link");
+        if (copyBtn) {
+            const url = copyBtn.getAttribute("data-url");
             try {
                 await navigator.clipboard.writeText(url);
-                const originalText = this.textContent.trim();
-                this.textContent = "Kopyalandı!";
-                setTimeout(() => { this.textContent = originalText; }, 1500);
-            } catch (e) {
+                const original = copyBtn.textContent.trim();
+                copyBtn.textContent = "Kopyalandı!";
+                setTimeout(() => { copyBtn.textContent = original; }, 1500);
+            } catch (err) {
                 alert("Kopyalama desteklenmiyor, URL'yi elle seçip kopyalayabilirsin.");
             }
-        });
+        }
     });
+
+    // Sayfa ilk açıldığında filtre uygula
+    applyFilters();
 </script>
 </body>
 </html>
