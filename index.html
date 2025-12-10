@@ -223,25 +223,38 @@
             margin-bottom: 18px;
         }
 
+        /* Kartların kendisi */
         .hero-text-grid p {
-            background: rgba(15,23,42,0.55);
+            position: relative;
             padding: 16px 18px;
             border-radius: 14px;
             font-size: 14px;
             line-height: 1.55;
-            border: 1px solid rgba(148,163,184,0.15);
-            backdrop-filter: blur(4px);
             color: var(--text-muted);
+
+        /* 🔥 Gradient border + hafif glow */
+         background:
+            radial-gradient(circle at top left, rgba(15,23,42,0.96), #020617) padding-box,
+            linear-gradient(120deg, #a855f7, #4f46e5, #22c55e, #4f46e5) border-box;
+            border: 1px solid transparent;
+            background-size: 110% 110%, 260% 260%;
+            box-shadow: 0 0 18px rgba(79,70,229,0.25);
+            animation: cardGlow 12s linear infinite;
         }
 
-        /* Mobilde alt alta */
-            @media (max-width: 768px) {
+      /* Mobilde: kartlar alt alta + daha az boşluk + biraz daha kompakt padding */
+        @media (max-width: 768px) {
             .hero-text-grid {
             grid-template-columns: 1fr;
-            }
+            gap: 10px;
+            margin-bottom: 14px;
         }
 
-
+        .hero-text-grid p {
+            padding: 14px 14px;
+            box-shadow: 0 0 12px rgba(79,70,229,0.2);
+        }
+    }
         .hero-actions {
             display: flex;
             flex-wrap: wrap;
@@ -265,6 +278,13 @@
             white-space: nowrap;
             }
         }
+
+        @keyframes cardGlow {
+            0%   { background-position: 0% 50%, 0% 50%; }
+            50%  { background-position: 100% 50%, 100% 50%; }
+            100% { background-position: 0% 50%, 0% 50%; }
+        }
+
 
 
         .btn-primary {
