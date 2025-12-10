@@ -221,13 +221,13 @@
         margin-bottom: 18px;
     }
 
-    /* Tünel kartı – içi koyu, sadece çerçeve renkli & animasyonlu */
+    /* Tünel kartı – içi koyu, sadece çerçeve renkli */
 .tunnel-card {
     position: relative;
     border-radius: 18px;
     padding: 16px 18px 18px;
 
-    /* İçi koyu, hero ile aynı ton */
+    /* iç kısım koyu, border gradient */
     background:
         linear-gradient(145deg, #020617, #050816) padding-box,
         linear-gradient(135deg,
@@ -245,19 +245,11 @@
     animation: tunnelGlow 14s ease infinite;
 }
 
-/* Daha küçük, daha yumuşak ışık lekesi */
+/* Artık ekstra arka plan ışığı yok */
 .tunnel-card::before {
-    content: "";
-    position: absolute;
-    inset: -20%;
-    background:
-        radial-gradient(circle at 15% 0, rgba(168,85,247,0.18), transparent 60%),
-        radial-gradient(circle at 85% 100%, rgba(34,197,94,0.22), transparent 60%);
-    opacity: 0.85;
-    filter: blur(2px);
-    mix-blend-mode: screen;
-    pointer-events: none;
+    content: none;
 }
+
 
 
 /* ✔ Hafif dönen ışık efekti (yumuşak, rahatsız etmeyecek animasyon) */
