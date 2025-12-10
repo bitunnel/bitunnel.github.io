@@ -223,6 +223,24 @@
             margin-bottom: 18px;
         }
 
+        /* Mobilde hero aksiyon butonlarını yan yana getir */
+        @media (max-width: 480px) {
+            .hero-actions {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+            .hero-actions a,
+            .hero-actions button {
+             flex: 1;          /* Her buton eşit genişlik alsın */
+            text-align: center;
+            white-space: nowrap;
+            }
+        }
+
+
         .btn-primary {
             padding: 9px 16px;
             border-radius: 999px;
