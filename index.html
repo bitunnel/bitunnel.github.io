@@ -142,17 +142,11 @@
         }
 
         main {
-            display: grid;
-            grid-template-columns: minmax(0, 2fr);
+            display: flex;
+            flex-direction: column;
             gap: 18px;
         }
 
-        @media (min-width: 840px) {
-            main {
-                grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.3fr);
-                align-items: flex-start;
-            }
-        }
 
         .hero {
             background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7));
