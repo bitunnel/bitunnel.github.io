@@ -216,74 +216,113 @@
             margin-bottom: 18px;
         }
 
-        .hero-text-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
+        /* Tünel akışı alanı */
+.tunnel-layout {
+    margin-top: 10px;
+    margin-bottom: 18px;
+}
 
-        /* Kartların kendisi */
-        .hero-text-grid p {
-            position: relative;
-            padding: 16px 18px;
-            border-radius: 14px;
-            font-size: 14px;
-            line-height: 1.55;
-            color: var(--text-muted);
+/* Ana tünel kartı */
+.tunnel-card {
+    position: relative;
+    border-radius: 18px;
+    padding: 16px 18px 18px;
+    background:
+        radial-gradient(circle at top left, rgba(15,23,42,0.98), #020617) padding-box,
+        linear-gradient(120deg, #a855f7, #4f46e5, #22c55e, #4f46e5) border-box;
+    border: 1px solid transparent;
+    background-size: 120% 120%, 260% 260%;
+    box-shadow: 0 20px 40px rgba(15,23,42,0.75);
+    overflow: hidden;
+}
 
-        /* 🔥 Gradient border + hafif glow */
-         background:
-            radial-gradient(circle at top left, rgba(15,23,42,0.96), #020617) padding-box,
-            linear-gradient(120deg, #a855f7, #4f46e5, #22c55e, #4f46e5) border-box;
-            border: 1px solid transparent;
-            background-size: 110% 110%, 260% 260%;
-            box-shadow: 0 0 18px rgba(79,70,229,0.25);
-            animation: cardGlow 12s linear infinite;
-        }
+/* Arka planda hafif tünel ışığı */
+.tunnel-card::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+        radial-gradient(circle at 10% 0, rgba(168,85,247,0.18), transparent 60%),
+        radial-gradient(circle at 90% 100%, rgba(34,197,94,0.18), transparent 55%);
+    opacity: 0.9;
+    mix-blend-mode: screen;
+    pointer-events: none;
+}
 
-      /* Mobilde: kartlar alt alta + daha az boşluk + biraz daha kompakt padding */
-        @media (max-width: 768px) {
-            .hero-text-grid {
-            grid-template-columns: 1fr;
-            gap: 4px;
-            margin-bottom: 10px;
-        }
+/* İçerik, glow'un üstünde */
+.tunnel-intro,
+.tunnel-steps {
+    position: relative;
+    z-index: 1;
+}
 
-        .hero-text-grid p {
-            padding: 14px 14px;
-            box-shadow: 0 0 10px rgba(79,70,229,0.2);
-        }
+/* Üstte kısa açıklama */
+.tunnel-intro {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+/* Adımlar (masaüstünde yan yana) */
+.tunnel-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+/* Tek tek step kartları */
+.tunnel-step {
+    border-radius: 14px;
+    padding: 12px 12px 13px;
+    background: rgba(15,23,42,0.9);
+    border: 1px solid rgba(148,163,184,0.25);
+    box-shadow: 0 10px 25px rgba(15,23,42,0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Numara ikonları (tünel girişleri gibi) */
+.step-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 0, #a855f7, #4f46e5 45%, #22c55e);
+    box-shadow: 0 0 0 4px rgba(79,70,229,0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #f9fafb;
+}
+
+/* Step başlıkları */
+.tunnel-step h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e5e7eb;
+}
+
+/* Step açıklama metinleri */
+.tunnel-step p {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-muted);
+}
+
+/* Mobil / tablet uyumu */
+@media (max-width: 960px) {
+    .tunnel-steps {
+        grid-template-columns: 1fr;
     }
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 18px;
-        }
 
-        /* Mobilde hero aksiyon butonlarını yan yana getir */
-        @media (max-width: 480px) {
-            .hero-actions {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            gap: 10px;
-        }
+    .tunnel-card {
+        padding: 14px 12px 16px;
+    }
+}
 
-            .hero-actions a,
-            .hero-actions button {
-             flex: 1;          /* Her buton eşit genişlik alsın */
-            text-align: center;
-            white-space: nowrap;
-            }
-        }
-
-        @keyframes cardGlow {
-            0%   { background-position: 0% 50%, 0% 50%; }
-            50%  { background-position: 100% 50%, 100% 50%; }
-            100% { background-position: 0% 50%, 0% 50%; }
-        }
 
 
 
@@ -653,27 +692,34 @@
                     <span class="accent">tek tünelden</span> erişin.
                 </h1>
 
-                <div class="hero-text-grid">
-    <p>
-        Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş linklerini hızlı ve güvenli şekilde sunan global bir bağlantı merkezidir. 
-    </p>
-    <p>
-        Engellenen adresleri takip etmeden, tüm güncel linklere tek tıkla erişim sağlayabilir ve favori platformlarınızı tek bir tünelde toplayabilirsiniz.
-    </p>
-    <p>
-        Hafif arayüzü ve yüksek erişilebilirliği ile Bitunnel, kullanıcılar için kesintisiz bağlantı deneyimi sunar.
-    </p>
+                <div class="tunnel-layout">
+    <div class="tunnel-card">
+        <div class="tunnel-intro">
+            Bitunnel, bahis, casino ve slot sağlayıcılarının sürekli değişen güncel giriş adreslerini tek bir tünelde toplayan hafif ve SEO uyumlu bir bağlantı merkezidir. Engellenen ya da yenilenen linkleri takip etmek zorunda kalmadan, her zaman güncel girişe aynı URL üzerinden ulaşırsınız.
+        </div>
 
-    <p>
-        Favori bahis sitelerinizi, casino sağlayıcılarını, panel girişlerinizi ve oyun platformlarını tek bir merkezde toplayabilir. 
-    </p>
-    <p>
-        Her zaman doğru ve aktif giriş bağlantısına tek bir URL üzerinden erişebilirsiniz. 
-    </p>
-    <p>
-        Bitunnel, kullanıcı dostu yapısı, hafif arayüzü ve global bağlantı sistemiyle kesintisiz erişim sunmayı amaçlayan modern bir tünel platformudur.
-    </p>
+        <div class="tunnel-steps">
+            <div class="tunnel-step">
+                <div class="step-icon">1</div>
+                <h3>Güncel giriş havuzu</h3>
+                <p>Farklı sağlayıcılara ait tüm güncel bahis ve casino giriş adresleri tek yerde toplanır; dağınık link takibiyle uğraşmazsınız.</p>
+            </div>
+
+            <div class="tunnel-step">
+                <div class="step-icon">2</div>
+                <h3>Akıllı tünel yönlendirme</h3>
+                <p>Bitunnel adresine gelir, kullanmak istediğiniz paneli seçersiniz. Sistem sizi anında doğru ve aktif giriş noktasına iletir.</p>
+            </div>
+
+            <div class="tunnel-step">
+                <div class="step-icon">3</div>
+                <h3>Hızlı ve güvenli erişim</h3>
+                <p>Ek yazılım, ağır script ve takipçi olmadan, tek HTML tabanlı hafif arayüzle temiz, hızlı ve güvenli bir bağlantı deneyimi yaşarsınız.</p>
+            </div>
+        </div>
+    </div>
 </div>
+
 
 
                 <div class="hero-actions">
