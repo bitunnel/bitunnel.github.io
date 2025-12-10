@@ -363,12 +363,24 @@
         max-width: 520px; /* üstteki metinle aynı genişlik */
     }
 
-    /* Küçük ekranlarda esnek olsun */
-    @media (max-width: 640px) {
-        .hero-actions {
-            max-width: 100%;
-        }
+    /* Küçük ekranlarda butonlar yan yana, eşit genişlikte */
+@media (max-width: 640px) {
+    .hero-actions {
+        max-width: 100%;
+        flex-wrap: nowrap;      /* alt alta düşmesin */
+        gap: 8px;
     }
+
+    .hero-actions a,
+    .hero-actions button {
+        flex: 1;               /* her buton yarım satır kaplasın */
+        min-width: 0;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;    /* yazı tek satır kalsın */
+    }
+}
+
 
     .hero-meta {
         display: flex;
@@ -747,7 +759,7 @@
 
                 <div class="hero-meta">
                     <span><strong>0 üçüncü parti çerez</strong> • gizlilik dostu</span>
-                    <span><strong>Hızlı açılış</strong> • tek HTML dosyası</span>
+                    <span><strong>Hızlı açılış</strong> • tek Güvenli URL</span>
                 </div>
             </div>
         </section>
