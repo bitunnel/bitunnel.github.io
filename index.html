@@ -882,15 +882,15 @@
     document.getElementById("year").textContent = new Date().getFullYear();
 
     const themeToggle = document.getElementById("theme-toggle");
-    const themeIcon = document.getElementById("theme-icon");
-    const themeLabel = document.getElementById("theme-label");
-    const THEME_KEY = "bitunnel-theme";
+    const themeIcon   = document.getElementById("theme-icon");
+    const themeLabel  = document.getElementById("theme-label");
+    const THEME_KEY   = "bitunnel-theme";
 
     function applyTheme(theme) {
         const isLight = theme === "light";
         document.body.classList.toggle("light-theme", isLight);
         localStorage.setItem(THEME_KEY, isLight ? "light" : "dark");
-        themeIcon.textContent = isLight ? "🌞" : "🌙";
+        themeIcon.textContent  = isLight ? "🌞" : "🌙";
         themeLabel.textContent = isLight ? "Karanlık temaya geç" : "Açık temaya geç";
     }
 
@@ -903,7 +903,7 @@
     });
 
     /*************************************************
-     * 2) KONFİG
+     * 2) KONFİG + FAVORİLER
      *************************************************/
     const FAVORITES_KEY = "bitunnel-favorites";
 
@@ -918,19 +918,23 @@
         favorites = new Set();
     }
 
+    // Uzak links.json adresi (ileride doldurursun)
+    // Örn: "https://senindomain.com/bitunnel/links.json"
+    const REMOTE_LINKS_URL = "";
+
     // Kategoriler
     const CATEGORIES = [
-        { id: "popular", label: "Popüler", icon: "🌟", pillClass: "category-pill-popular" },
-        { id: "betconstruct", label: "BetConstruct", icon: "🎛", pillClass: "category-pill-betconstruct" },
-        { id: "pronet", label: "Pronet Gaming", icon: "🎮", pillClass: "category-pill-pronet" }
+        { id: "popular",      label: "Popüler",       icon: "🌟", pillClass: "category-pill-popular" },
+        { id: "betconstruct", label: "BetConstruct",  icon: "🎛", pillClass: "category-pill-betconstruct" },
+        { id: "pronet",       label: "Pronet Gaming", icon: "🎮", pillClass: "category-pill-pronet" }
     ];
 
-    // Linkler – URL'ler benzersiz olmalı (favori için anahtar olarak kullanıyoruz)
-    const LINKS = [
+    // Varsayılan linkler (links.json yoksa bunlar kullanılacak)
+    const DEFAULT_LINKS = [
         // POPÜLER
-        { label: "Popüler Site 1", url: "https://populer1.example", tag: "Popüler", category: "popular" },
-        { label: "Popüler Site 2", url: "https://populer2.example", tag: "Popüler", category: "popular" },
-        { label: "Popüler Site 3", url: "https://populer3.example", tag: "Popüler", category: "popular" },
+        { label: "Popüler Site 1", url: "https://populer1.example", tag: "Popüler",        category: "popular" },
+        { label: "Popüler Site 2", url: "https://populer2.example", tag: "Popüler",        category: "popular" },
+        { label: "Popüler Site 3", url: "https://populer3.example", tag: "Popüler",        category: "popular" },
 
         // BETCONSTRUCT
         { label: "BetConstruct Panel 1", url: "https://bc-panel1.example", tag: "BetConstruct", category: "betconstruct" },
@@ -943,21 +947,26 @@
         { label: "Pronet Gaming Site 3", url: "https://pronet3.example", tag: "Pronet Gaming", category: "pronet" }
     ];
 
+    // Şu an kullanılan link listesi (başlangıçta varsayılan)
+    let LINKS = DEFAULT_LINKS;
+
     /*************************************************
-     * 3) ARAYÜZÜ DİNAMİK OLARAK OLUŞTUR
+     * 3) DOM REFERANSLARI
      *************************************************/
     const categoryRow = document.getElementById("category-row");
-    const linkList = document.getElementById("link-list");
+    const linkList    = document.getElementById("link-list");
     const searchInput = document.getElementById("link-search");
 
-    // Favorisi varsa, sayfa favoriler filtresiyle açılsın
+    // Favorisi varsa, sayfa favoriler filtresi ile açılsın
     let currentCategory = favorites.size > 0 ? "favorites" : "all";
 
     function saveFavorites() {
         localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites]));
     }
 
-    // Kategori butonları
+    /*************************************************
+     * 4) KATEGORİ & LİNKLERİ ÇİZ
+     *************************************************/
     function renderCategories() {
         const frag = document.createDocumentFragment();
 
@@ -978,7 +987,10 @@
         // Diğer kategoriler
         CATEGORIES.forEach(cat => {
             const btn = document.createElement("button");
-            btn.className = "category-pill " + (cat.pillClass || "") + (currentCategory === cat.id ? " active" : "");
+            btn.className =
+                "category-pill " +
+                (cat.pillClass || "") +
+                (currentCategory === cat.id ? " active" : "");
             btn.dataset.filter = cat.id;
             btn.innerHTML =
                 (cat.icon ? `<span class="icon">${cat.icon}</span>` : "") +
@@ -990,7 +1002,6 @@
         categoryRow.appendChild(frag);
     }
 
-    // Link listesi
     function renderLinks() {
         const frag = document.createDocumentFragment();
 
@@ -998,9 +1009,9 @@
             const isFav = favorites.has(link.url);
 
             const article = document.createElement("article");
-            article.className = "link-item";
+            article.className      = "link-item";
             article.dataset.category = link.category;
-            article.dataset.url = link.url;
+            article.dataset.url      = link.url;
 
             article.innerHTML = `
                 <div class="link-main">
@@ -1037,11 +1048,8 @@
         linkList.appendChild(frag);
     }
 
-    renderCategories();
-    renderLinks();
-
     /*************************************************
-     * 4) FİLTRELEME + KOPYALAMA + FAVORİ
+     * 5) FİLTRE / ARAMA
      *************************************************/
     function applyFilters() {
         const query = (searchInput?.value || "").toLowerCase().trim();
@@ -1050,12 +1058,12 @@
         let visibleCount = 0;
 
         items.forEach(item => {
-            const label = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
-            const url = item.dataset.url || "";
-            const urlText = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
-            const tag = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
+            const label    = item.querySelector(".link-label")?.textContent.toLowerCase() || "";
+            const url      = item.dataset.url || "";
+            const urlText  = item.querySelector(".link-url")?.textContent.toLowerCase() || "";
+            const tag      = item.querySelector(".link-tag")?.textContent.toLowerCase() || "";
             const category = item.dataset.category || "";
-            const isFav = favorites.has(url);
+            const isFav    = favorites.has(url);
 
             const matchText =
                 !query ||
@@ -1082,9 +1090,9 @@
         if (!emptyState) {
             emptyState = document.createElement("p");
             emptyState.id = "empty-state";
-            emptyState.style.fontSize = "11px";
-            emptyState.style.color = "#9ca3af";
-            emptyState.style.marginTop = "6px";
+            emptyState.style.fontSize   = "11px";
+            emptyState.style.color      = "#9ca3af";
+            emptyState.style.marginTop  = "6px";
             linkList.after(emptyState);
         }
         emptyState.textContent = visibleCount === 0
@@ -1096,7 +1104,9 @@
         searchInput.addEventListener("input", applyFilters);
     }
 
-    // Kategori tıklamaları
+    /*************************************************
+     * 6) EVENTLER (KATEGORİ / KOPYALA / FAVORİ)
+     *************************************************/
     categoryRow.addEventListener("click", (e) => {
         const btn = e.target.closest(".category-pill");
         if (!btn) return;
@@ -1110,10 +1120,9 @@
         applyFilters();
     });
 
-    // Link aksiyonları (kopyala + favori)
     linkList.addEventListener("click", async (e) => {
         const copyBtn = e.target.closest(".copy-link");
-        const favBtn = e.target.closest(".fav-toggle");
+        const favBtn  = e.target.closest(".fav-toggle");
 
         if (copyBtn) {
             const url = copyBtn.getAttribute("data-url");
@@ -1142,19 +1151,75 @@
             favBtn.classList.toggle("active", isNowFav);
             favBtn.setAttribute("aria-pressed", isNowFav ? "true" : "false");
             const iconSpan = favBtn.querySelector(".icon");
-            if (iconSpan) {
-                iconSpan.textContent = isNowFav ? "★" : "☆";
-            }
+            if (iconSpan) iconSpan.textContent = isNowFav ? "★" : "☆";
 
-            // Favoriler filtresindeysek, listeyi güncelle
             if (currentCategory === "favorites") {
                 applyFilters();
             }
         }
     });
 
-    // İlk yüklemede filtre uygula
-    applyFilters();
+    /*************************************************
+     * 7) links.json UZAKTAN / YERELDEN YÜKLE, YOKSA DEFAULT
+     *************************************************/
+    async function tryLoadLinksFromJson() {
+        // 1) Uzak JSON (REMOTE_LINKS_URL doluysa)
+        if (REMOTE_LINKS_URL) {
+            try {
+                const respRemote = await fetch(REMOTE_LINKS_URL, { cache: "no-store" });
+                if (respRemote.ok) {
+                    const data = await respRemote.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        LINKS = data
+                            .filter(item => item && item.url)
+                            .map(item => ({
+                                label:    item.label    || item.url,
+                                url:      item.url,
+                                tag:      item.tag      || "",
+                                category: item.category || "popular"
+                            }));
+                        return; // uzak JSON başarılı, bırak
+                    }
+                }
+            } catch (e) {
+                // sessizce geç, aşağıda lokal/varsayılan denenir
+            }
+        }
+
+        // 2) Aynı dizindeki links.json
+        try {
+            const respLocal = await fetch("links.json", { cache: "no-store" });
+            if (respLocal.ok) {
+                const data = await respLocal.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    LINKS = data
+                        .filter(item => item && item.url)
+                        .map(item => ({
+                            label:    item.label    || item.url,
+                            url:      item.url,
+                            tag:      item.tag      || "",
+                            category: item.category || "popular"
+                        }));
+                    return;
+                }
+            }
+        } catch (e) {
+            // yoksa burayı da sessiz geç
+        }
+
+        // 3) Hiçbiri yoksa varsayılanlarla devam
+        LINKS = DEFAULT_LINKS;
+    }
+
+    async function init() {
+        await tryLoadLinksFromJson();
+        renderCategories();
+        renderLinks();
+        applyFilters();
+    }
+
+    init();
 </script>
+
 </body>
 </html>
