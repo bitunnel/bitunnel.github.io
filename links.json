@@ -1,19 +1,37 @@
 [
   {
     "label": "Kazandra",
-    "url": "https://kazandra.com",
+    "url": "https://t.ly/bikaz",
     "tag": "BetConstruct",
     "category": "betconstruct"
   },
   {
     "label": "Timebet",
-    "url": "https://timebet.com",
+    "url": "https://t.ly/bitime",
     "tag": "BetConstruct",
     "category": "betconstruct"
   },
   {
     "label": "Redwin",
-    "url": "https://redwin.com",
+    "url": "https://t.ly/bired",
+    "tag": "Pronet Gaming",
+    "category": "pronet"
+  },
+  {
+    "label": "Slotbar",
+    "url": "https://t.ly/bislot",
+    "tag": "Popüler",
+    "category": "popular"
+  },
+  {
+    "label": "Kingbetting",
+    "url": "https://t.ly/biking",
+    "tag": "BetConstruct",
+    "category": "betconstruct"
+  },
+  {
+    "label": "Betcup",
+    "url": "https://t.ly/bicup",
     "tag": "Pronet Gaming",
     "category": "pronet"
   }
