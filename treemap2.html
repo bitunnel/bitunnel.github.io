@@ -179,7 +179,7 @@
     // ✅ GARANTİ click: sendBeacon + keepalive fetch
     function trackClick(id){
       try{
-        const url = `${API_BASE}/click`;
+        const url = `${API_BASE}/hit`;
         const payload = JSON.stringify({ id });
 
         // 1) sendBeacon (sekme açarken bile kaybolmaz)
@@ -215,14 +215,16 @@
     }
 
     async function fetchStats(){
-      try{
-        const r = await fetch(`${API_BASE}/stats`, { cache:"no-store" });
-        const j = await r.json();
-        return (j && j.ok && j.stats) ? j.stats : {};
-      }catch{
-        return {};
-      }
-    }
+  try{
+    const ids = itemsCache.map(x => x.id).join(",");
+    const r = await fetch(`${API_BASE}/stats?ids=${encodeURIComponent(ids)}`, { cache:"no-store" });
+    const j = await r.json();
+    return (j && j.ok && j.stats) ? j.stats : {};
+  }catch{
+    return {};
+  }
+}
+
 
     function setLiveInfo(on){
       document.getElementById("liveInfo").textContent = `Canlı: ${on ? "açık" : "kapalı"}`;
@@ -339,14 +341,16 @@
         .style("opacity", 0)
         .on("click", (event, d) => {
           // ✅ önce aç, sonra click say
-          openUrl(d.data.url);
           trackClick(d.data.id);
+setTimeout(()=> openUrl(d.data.url), 120);
+
         })
         .on("keydown", (event, d) => {
           if(event.key === "Enter" || event.key === " "){
             event.preventDefault();
-            openUrl(d.data.url);
             trackClick(d.data.id);
+setTimeout(()=> openUrl(d.data.url), 120);
+
           }
         });
 
