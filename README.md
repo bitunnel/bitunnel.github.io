@@ -11,7 +11,9 @@
 <strong>bahis site giriş adresleri</strong>, 
 <strong>casino site giriş adresleri</strong> ve 
 <strong>online slot oyunları</strong> için geliştirilmiş güvenilir bir erişim platformudur. 
-bitunnel.github.io üzerinden yayın yapan bu sistem, kullanıcıların 
+<a href="https://bitunnel.github.io" 
+   target="_blank"
+   title="Bitunnel | Bahis ve Casino Site Giriş Adresleri">bitunnel.github.io</a> üzerinden yayın yapan bu sistem, kullanıcıların 
 <strong>gerçek ve güncel site adreslerine</strong> tek tıkla ulaşmasını sağlar.
 </p>
 
