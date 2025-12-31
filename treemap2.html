@@ -125,17 +125,16 @@
     // =========================
     const LINKS_URL = "./links.json";
 
-    // ✅ Burayı kendi Worker URL’in ile değiştir:
+    // ✅ Worker base URL (sonunda /stats veya /click OLMAYACAK)
     const API_BASE  = "https://bitunnel-treemap.info-bitunnel.workers.dev";
 
-
     // Kaç saniyede bir güncellensin? (Coin360 hissi)
-    const REFRESH_MS = 8000; // 8 saniye (istersen 5000 yap)
+    const REFRESH_MS = 8000; // istersen 5000
 
     // Trend etki şiddeti (glow/border)
     const GLOW_MAX_PX = 14;
 
-    // Tag renkleri (kutu rengi kategori sabit)
+    // Tag renkleri
     const TAG_COLORS = new Map([
       ["BetConstruct", "#7c3aed"],
       ["Pronet Gaming", "#06b6d4"],
@@ -154,29 +153,46 @@
       window.open(url, "_blank", "noopener,noreferrer");
     }
 
-    // Boyut skoru: stabil + trend boost (Coin360 hissi)
+    // ✅ Boyut skoru: daha belirgin büyüme (az tıklamada bile fark edilir)
     function computeSize(stat){
       if(!stat) return 1;
       const c24 = stat.clicks_24h || 0;
       const c1  = stat.clicks_1h  || 0;
-      return Math.max(1, c24 + c1 * 3);
+      // İstersen daha da agresif yapabilirsin:
+      // return Math.max(1, c24 * 5 + c1 * 20);
+      return Math.max(1, c24 * 2 + c1 * 10);
     }
 
-    // Trend oranı (glow için): current hour vs previous hour
+    // Trend oranı (glow için)
     function computeTrend(stat){
       if(!stat) return 0;
       const cur = stat.clicks_1h || 0;
       const prev = stat.prev_1h || 0;
-      return (cur - prev) / Math.max(1, prev); // -1..+inf
+      return (cur - prev) / Math.max(1, prev);
     }
 
-    async function trackClick(id){
+    // ✅ GARANTİ click: sendBeacon + keepalive fetch
+    function trackClick(id){
       try{
-        await fetch(`${API_BASE}/click`,{
+        const url = `${API_BASE}/click`;
+        const payload = JSON.stringify({ id });
+
+        // 1) sendBeacon (sekme açarken bile kaybolmaz)
+        if (navigator.sendBeacon) {
+          const blob = new Blob([payload], { type: "application/json" });
+          const ok = navigator.sendBeacon(url, blob);
+          if (ok) return;
+        }
+
+        // 2) fetch keepalive (fallback)
+        fetch(url, {
           method:"POST",
           headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ id })
-        });
+          body: payload,
+          keepalive: true,
+          mode: "cors",
+          cache: "no-store"
+        }).catch(()=>{});
       }catch{}
     }
 
@@ -206,7 +222,7 @@
         children: Array.from(groups, ([tag, arr]) => ({
           name: tag,
           children: arr.map(x => {
-            const id = x.id; // id zorunlu dediğimiz için direkt alıyoruz
+            const id = x.id;
             const stat = statsMap[id];
             return {
               id,
@@ -225,7 +241,7 @@
     }
 
     // =========================
-    // D3 TREEMAP (UPDATE + TRANSITION)
+    // D3 TREEMAP
     // =========================
     let svg, gRoot, zoomBehavior;
     let lastWidth = 0, lastHeight = 0;
@@ -271,10 +287,10 @@
     }
 
     function glowStyle(trend){
-      // trend büyükse glow artar. 0..1 arası normalize edelim
       const t = clamp(trend, -1, 1);
       const strength = clamp(Math.abs(t), 0, 1);
       const isUp = t >= 0;
+
       const stroke = isUp
         ? `rgba(34,197,94,${0.15 + strength * 0.65})`
         : `rgba(239,68,68,${0.15 + strength * 0.65})`;
@@ -292,13 +308,11 @@
       const sel = gRoot.selectAll("g.node")
         .data(leaves, d => d.data.id);
 
-      // EXIT
       sel.exit()
         .transition().duration(animate ? 350 : 0)
         .style("opacity", 0)
         .remove();
 
-      // ENTER
       const enter = sel.enter()
         .append("g")
         .attr("class","node")
@@ -306,14 +320,15 @@
         .attr("tabindex", 0)
         .style("opacity", 0)
         .on("click", (event, d) => {
-          trackClick(d.data.id);     // say
-          openUrl(d.data.url);       // aç
+          // ✅ önce aç, sonra say (gesture/popup daha stabil)
+          openUrl(d.data.url);
+          trackClick(d.data.id);
         })
         .on("keydown", (event, d) => {
           if(event.key === "Enter" || event.key === " "){
             event.preventDefault();
-            trackClick(d.data.id);
             openUrl(d.data.url);
+            trackClick(d.data.id);
           }
         });
 
@@ -321,16 +336,13 @@
       enter.append("text").attr("class","label").attr("x",10).attr("y",18);
       enter.append("text").attr("class","tag").attr("x",10).attr("y",36);
 
-      // UPDATE + ENTER MERGE
       const merged = enter.merge(sel);
 
-      // Position transition
       merged.transition().duration(animate ? 500 : 0)
         .ease(d3.easeCubicOut)
         .style("opacity", 1)
         .attr("transform", d => `translate(${d.x0},${d.y0})`);
 
-      // Rect update
       merged.select("rect").transition().duration(animate ? 500 : 0)
         .ease(d3.easeCubicOut)
         .attr("width", d => Math.max(0, d.x1 - d.x0))
@@ -341,21 +353,15 @@
         .attr("stroke-width", d => glowStyle(d.data.trend || 0).strokeWidth)
         .style("filter", d => glowStyle(d.data.trend || 0).filter);
 
-      // Text update
-      merged.select("text.label")
-        .text(d => d.data.name);
+      merged.select("text.label").text(d => d.data.name);
+      merged.select("text.tag").text(d => d.data.tag || "");
 
-      merged.select("text.tag")
-        .text(d => d.data.tag || "");
-
-      // Tooltip (native)
-      merged.select("rect")
-        .each(function(d){
-          const t = d.data.trend || 0;
-          const tPct = Math.round(t * 100);
-          const title = `${d.data.name}\n${d.data.tag}\n1h: ${d.data.clicks_1h} | ~24h: ${d.data.clicks_24h}\nTrend: ${tPct}%`;
-          d3.select(this).attr("title", title);
-        });
+      merged.select("rect").each(function(d){
+        const t = d.data.trend || 0;
+        const tPct = Math.round(t * 100);
+        const title = `${d.data.name}\n${d.data.tag}\n1h: ${d.data.clicks_1h} | ~24h: ${d.data.clicks_24h}\nTrend: ${tPct}%`;
+        d3.select(this).attr("title", title);
+      });
     }
 
     // =========================
@@ -419,7 +425,6 @@
         if(!res.ok) throw new Error("links.json okunamadı: " + res.status);
         const items = await res.json();
 
-        // id kontrolü
         const missingId = items.find(x => !x.id);
         if(missingId) throw new Error("links.json içinde id eksik: " + JSON.stringify(missingId));
 
@@ -428,10 +433,8 @@
         populateFilterOptions(itemsCache);
         setCountInfo(itemsCache.length);
 
-        // ilk render (stats ile)
         await refreshOnce(false);
 
-        // filtre değişince
         document.getElementById("tagFilter").addEventListener("change", async (e)=>{
           const tag = e.target.value;
           const count = (tag==="ALL") ? itemsCache.length : itemsCache.filter(x => (x.tag||"Diğer")===tag).length;
@@ -440,7 +443,6 @@
           await refreshOnce(false);
         });
 
-        // toolbar eventler
         document.getElementById("zoomInBtn").addEventListener("click", zoomInTrue);
         document.getElementById("zoomOutBtn").addEventListener("click", zoomOutTrue);
         document.getElementById("resetZoomBtn").addEventListener("click", resetZoom);
@@ -452,10 +454,8 @@
           if(icon) icon.className = document.fullscreenElement ? "fa-solid fa-compress" : "fa-solid fa-expand";
         });
 
-        // live başlat
         startLive();
 
-        // responsive: resize olunca tekrar kur
         window.addEventListener("resize", ()=>{
           initSvg();
           refreshOnce(false);
