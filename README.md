@@ -85,6 +85,8 @@ Sonuç olarak Bitunnel,
 <strong>bahis site giriş adresi</strong> ve 
 <strong>casino site giriş adresi TR & Global</strong> arayan kullanıcılar için 
 güvenilir, hızlı ve pratik bir çözüm sunar. 
-bitunnel.github.io üzerinden en güncel bağlantılara güvenle ulaşabilirsiniz.
+<a href="https://bitunnel.github.io" 
+   target="_blank"
+   title="Bitunnel | Bahis ve Casino Site Giriş Adresleri">bitunnel.github.io</a> üzerinden en güncel bağlantılara güvenle ulaşabilirsiniz.
 </p>
 
