@@ -1,16 +1,9 @@
-<a href="https://bitunnel.github.io" 
-   target="_blank"
-   title="Bitunnel | Bahis ve Casino Site Giriş Adresleri">
-  
-  <img 
+<img 
     src="https://github.com/user-attachments/assets/534aa949-7936-483f-b1de-6e2d27351f7e"
     width="1536"
     height="1024"
     alt="Bitunnel bahis casino site giriş adresleri TR ve Global"
     loading="lazy">
-    
-</a>
-
 <h1>Bitunnel | Bahis ve Casino Site Giriş Adresleri TR & Global</h1>
 
 <p>
