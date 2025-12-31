@@ -129,7 +129,7 @@
     const API_BASE  = "https://bitunnel-treemap.info-bitunnel.workers.dev";
 
     // Kaç saniyede bir güncellensin? (Coin360 hissi)
-    const REFRESH_MS = 8000; // istersen 5000
+    const REFRESH_MS = 8000;
 
     // Trend etki şiddeti (glow/border)
     const GLOW_MAX_PX = 14;
@@ -141,6 +141,9 @@
       ["Popüler", "#f59e0b"]
     ]);
 
+    // Debug log (istersen false yap)
+    const DEBUG_LOG = false;
+
     // =========================
     // UTIL
     // =========================
@@ -150,17 +153,19 @@
 
     function openUrl(url){
       if(!url) return;
+      // popup blocker riskini azaltır: click handler içinde çağrılıyor
       window.open(url, "_blank", "noopener,noreferrer");
     }
 
-    // ✅ Boyut skoru: daha belirgin büyüme (az tıklamada bile fark edilir)
+    // ✅ Boyut skoru: daha belirgin büyüme (Coin360 hissi)
     function computeSize(stat){
       if(!stat) return 1;
       const c24 = stat.clicks_24h || 0;
       const c1  = stat.clicks_1h  || 0;
-      // İstersen daha da agresif yapabilirsin:
-      // return Math.max(1, c24 * 5 + c1 * 20);
-      return Math.max(1, c24 * 2 + c1 * 10);
+
+      // Daha agresif büyüme (az tıklamada fark)
+      // İstersen oynayabilirsin:
+      return Math.max(1, c24 * 5 + c1 * 20);
     }
 
     // Trend oranı (glow için)
@@ -179,9 +184,16 @@
 
         // 1) sendBeacon (sekme açarken bile kaybolmaz)
         if (navigator.sendBeacon) {
-          const blob = new Blob([payload], { type: "application/json" });
-          const ok = navigator.sendBeacon(url, blob);
+          // Bazı tarayıcılarda application/json ile sorun çıkabiliyor, fallback için text/plain da var
+          const blobJson = new Blob([payload], { type: "application/json" });
+          const ok = navigator.sendBeacon(url, blobJson);
+          if (DEBUG_LOG) console.log("beacon(json):", ok, id);
           if (ok) return;
+
+          const blobTxt = new Blob([payload], { type: "text/plain" });
+          const ok2 = navigator.sendBeacon(url, blobTxt);
+          if (DEBUG_LOG) console.log("beacon(text):", ok2, id);
+          if (ok2) return;
         }
 
         // 2) fetch keepalive (fallback)
@@ -191,9 +203,15 @@
           body: payload,
           keepalive: true,
           mode: "cors",
-          cache: "no-store"
-        }).catch(()=>{});
-      }catch{}
+          cache: "no-store",
+        }).then(()=>{
+          if (DEBUG_LOG) console.log("fetch(keepalive) ok:", id);
+        }).catch(()=>{
+          if (DEBUG_LOG) console.log("fetch(keepalive) fail:", id);
+        });
+      }catch(e){
+        if (DEBUG_LOG) console.log("trackClick error:", e);
+      }
     }
 
     async function fetchStats(){
@@ -320,7 +338,7 @@
         .attr("tabindex", 0)
         .style("opacity", 0)
         .on("click", (event, d) => {
-          // ✅ önce aç, sonra say (gesture/popup daha stabil)
+          // ✅ önce aç, sonra click say
           openUrl(d.data.url);
           trackClick(d.data.id);
         })
