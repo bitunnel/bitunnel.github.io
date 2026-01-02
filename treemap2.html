@@ -13,81 +13,62 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
-    :root {
-      --bg: #0b1220;
-      --panel: rgba(255,255,255,.05);
-      --panel2: rgba(255,255,255,.08);
-      --stroke: rgba(255,255,255,.15);
-      --text: #e5e7eb;
+    :root{
+      --bg:#0b1220;
+      --panel:rgba(255,255,255,.05);
+      --panel2:rgba(255,255,255,.08);
+      --stroke:rgba(255,255,255,.15);
+      --text:#e5e7eb;
     }
-    body { background: var(--bg); color: var(--text); }
-    .wrap { max-width: 1280px; margin: 22px auto; padding: 0 14px; }
-    .topbar {
-      display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;
-      margin-bottom: 12px;
+    body{background:var(--bg);color:var(--text);}
+    .wrap{max-width:1280px;margin:22px auto;padding:0 14px;}
+    .topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px;}
+    .leftbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .pill{
+      background:var(--panel);border:1px solid var(--stroke);color:var(--text);
+      border-radius:999px;padding:8px 12px;font-size:14px;display:inline-flex;gap:8px;align-items:center;
     }
-    .leftbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    .pill {
-      background: var(--panel); border:1px solid var(--stroke);
-      color: var(--text); border-radius: 999px; padding: 8px 12px; font-size: 14px;
-      display:inline-flex; gap:8px; align-items:center;
+    .hint{opacity:.85;font-size:13px;}
+    #stage{
+      width:100%;height:78vh;background:rgba(255,255,255,.03);
+      border-radius:16px;border:1px solid rgba(255,255,255,.08);
+      overflow:hidden;position:relative;
     }
-    .hint { opacity:.85; font-size: 13px; }
-    #stage {
-      width:100%;
-      height: 78vh;
-      background: rgba(255,255,255,.03);
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.08);
-      overflow:hidden;
-      position:relative;
-    }
-    #chart { width:100%; height:100%; }
+    #chart{width:100%;height:100%;}
 
-    .toolbar {
-      position:absolute; top:12px; right:12px;
-      display:flex; flex-direction:column; gap:8px;
-      z-index: 10;
+    .toolbar{
+      position:absolute;top:12px;right:12px;
+      display:flex;flex-direction:column;gap:8px;z-index:10;
     }
-    .toolbtn {
-      width:42px; height:42px; border-radius: 14px;
-      background: var(--panel2);
-      border: 1px solid rgba(255,255,255,.14);
-      color: var(--text);
-      display:flex; align-items:center; justify-content:center;
-      cursor:pointer;
-      user-select:none;
-      transition: transform .12s ease, background .12s ease;
+    .toolbtn{
+      width:42px;height:42px;border-radius:14px;background:var(--panel2);
+      border:1px solid rgba(255,255,255,.14);color:var(--text);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;
+      transition:transform .12s ease, background .12s ease;
     }
-    .toolbtn:hover { transform: translateY(-1px); background: rgba(255,255,255,.12); }
+    .toolbtn:hover{transform:translateY(-1px);background:rgba(255,255,255,.12);}
 
-    .node { cursor:pointer; }
-    .node rect { stroke: rgba(255,255,255,.18); }
-    .node:hover rect { stroke: rgba(255,255,255,.60); }
-    .label { pointer-events:none; font-size: 12px; fill:#fff; }
-    .tag { pointer-events:none; font-size: 11px; fill: rgba(255,255,255,.82); }
+    .node{cursor:pointer;}
+    .node rect{stroke:rgba(255,255,255,.18);}
+    .node:hover rect{stroke:rgba(255,255,255,.60);}
+    .label{pointer-events:none;font-size:12px;fill:#fff;}
+    .tag{pointer-events:none;font-size:11px;fill:rgba(255,255,255,.82);}
 
-    .badge-mini {
-      display:inline-block; padding: 4px 10px; border-radius:999px;
-      background: rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.10);
-      font-size: 12px; opacity: .95;
+    .badge-mini{
+      display:inline-block;padding:4px 10px;border-radius:999px;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);
+      font-size:12px;opacity:.95;
     }
-    .select {
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 8px 12px;
-      outline: none;
+    .select{
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      color:var(--text);border-radius:999px;padding:8px 12px;outline:none;
     }
-    .select option { color:#111; }
+    .select option{color:#111;}
 
-    .footerbar {
-      margin-top: 10px;
-      display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-      opacity:.95;
+    .footerbar{
+      margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;opacity:.95;
     }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New"; }
+    .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New";}
   </style>
 </head>
 
@@ -134,9 +115,6 @@
   </div>
 
   <script>
-    // =========================
-    // Ayarlar
-    // =========================
     const LINKS_URL = "./links.json";
 
     const TAG_COLORS = new Map([
@@ -145,27 +123,13 @@
       ["Popüler", "#f59e0b"]
     ]);
 
-    function hash(s="") {
-      let h = 0;
-      for (let i=0;i<s.length;i++) h = Math.imul(31,h) + s.charCodeAt(i) | 0;
-      return h;
-    }
-    function colorForTag(tag) {
-      return TAG_COLORS.get(tag) || d3.schemeTableau10[Math.abs(hash(tag)) % 10];
-    }
-    function openUrl(url) {
-      if (!url) return;
-      window.open(url, "_blank", "noopener,noreferrer");
-    }
+    function hash(s=""){ let h=0; for(let i=0;i<s.length;i++) h=Math.imul(31,h)+s.charCodeAt(i)|0; return h; }
+    function colorForTag(tag){ return TAG_COLORS.get(tag) || d3.schemeTableau10[Math.abs(hash(tag)) % 10]; }
+    function openUrl(url){ if(!url) return; window.open(url,"_blank","noopener,noreferrer"); }
 
-    // links.json -> hierarchy (tag gruplu)
-    function toHierarchy(items, onlyTag = "ALL") {
-      const filtered = (onlyTag === "ALL")
-        ? items
-        : items.filter(x => (x.tag || "Diğer") === onlyTag);
-
+    function toHierarchy(items, onlyTag="ALL"){
+      const filtered = (onlyTag==="ALL") ? items : items.filter(x => (x.tag||"Diğer")===onlyTag);
       const groups = d3.group(filtered, d => d.tag || "Diğer");
-
       return {
         name: "Bahis ve Casino Siteleri",
         children: Array.from(groups, ([tag, arr]) => ({
@@ -181,17 +145,12 @@
       };
     }
 
-    // =========================
-    // D3 Treemap + Zoom (PAN KAPALI)
-    // =========================
     let svg, gRoot, zoomBehavior;
     let currentHierarchy = null;
 
-    function clearChart() {
-      document.getElementById("chart").innerHTML = "";
-    }
+    function clearChart(){ document.getElementById("chart").innerHTML=""; }
 
-    function renderTreemap(hierarchyData) {
+    function renderTreemap(hierarchyData){
       currentHierarchy = hierarchyData;
 
       const el = document.getElementById("chart");
@@ -203,23 +162,33 @@
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        // Mobilde sürükleyip “çekme” hissini bitirir:
-        .style("touch-action", "manipulation"); // none değil (sayfa davranışı daha doğal)
+        // mobilde tek parmakla sürükle-pan olmasın, ama pinch olsun:
+        .style("touch-action", "pinch-zoom");
 
       gRoot = svg.append("g");
 
-      // Zoom davranışı: BUTONLARLA ZOOM, PAN YOK
+      // ✅ PAN kapalı, ✅ wheel + pinch zoom açık
       zoomBehavior = d3.zoom()
         .scaleExtent([0.6, 8])
-        // 🔒 Sadece programatik (buton) transform olsun: kullanıcı drag/touch/wheel yapamasın
-        .filter(() => false)
+        .filter((event) => {
+          // Drag (mouse/touch) ile pan'i kapat
+          if (event.type === "mousedown" || event.type === "touchstart") return false;
+
+          // Wheel ile zoom açık
+          if (event.type === "wheel") return true;
+
+          // Mobilde pinch (touchmove) eventleri d3 tarafından yönetilir
+          // pinch sırasında d3 "touchmove" görür, buna izin verelim
+          if (event.type === "touchmove") return true;
+
+          return false;
+        })
         .on("zoom", (event) => {
           gRoot.attr("transform", event.transform);
         });
 
       svg.call(zoomBehavior);
 
-      // Treemap layout
       const root = d3.hierarchy(hierarchyData)
         .sum(d => d.value || 0)
         .sort((a,b) => (b.value||0) - (a.value||0));
@@ -236,157 +205,126 @@
         .data(leaves)
         .enter()
         .append("g")
-        .attr("class", "node")
+        .attr("class","node")
         .attr("transform", d => `translate(${d.x0},${d.y0})`)
-        .attr("tabindex", 0)
-        .attr("role", "link")
+        .attr("tabindex",0)
+        .attr("role","link")
         .attr("aria-label", d => `${d.data.name} sitesini aç`)
-        .on("click", (event, d) => openUrl(d.data.url))
-        .on("keydown", (event, d) => {
-          if (event.key === "Enter" || event.key === " ") {
+        .on("click",(event,d)=>openUrl(d.data.url))
+        .on("keydown",(event,d)=>{
+          if(event.key==="Enter" || event.key===" "){
             event.preventDefault();
             openUrl(d.data.url);
           }
         });
 
       nodes.append("rect")
-        .attr("rx", 12)
-        .attr("ry", 12)
-        .attr("width", d => Math.max(0, d.x1 - d.x0))
-        .attr("height", d => Math.max(0, d.y1 - d.y0))
+        .attr("rx",12).attr("ry",12)
+        .attr("width", d => Math.max(0, d.x1-d.x0))
+        .attr("height", d => Math.max(0, d.y1-d.y0))
         .attr("fill", d => colorForTag(d.data.tag || d.parent?.data?.name || "Diğer"))
-        .attr("opacity", 0.92);
+        .attr("opacity",0.92);
 
-      // ClipPath
       nodes.append("clipPath")
-        .attr("id", (d, i) => `clip-${i}`)
+        .attr("id",(d,i)=>`clip-${i}`)
         .append("rect")
-        .attr("rx", 12)
-        .attr("ry", 12)
-        .attr("width", d => Math.max(0, d.x1 - d.x0))
-        .attr("height", d => Math.max(0, d.y1 - d.y0));
+        .attr("rx",12).attr("ry",12)
+        .attr("width", d => Math.max(0, d.x1-d.x0))
+        .attr("height", d => Math.max(0, d.y1-d.y0));
 
       nodes.append("text")
-        .attr("clip-path", (d,i) => `url(#clip-${i})`)
-        .attr("class", "label")
-        .attr("x", 10)
-        .attr("y", 18)
-        .text(d => d.data.name);
+        .attr("clip-path",(d,i)=>`url(#clip-${i})`)
+        .attr("class","label")
+        .attr("x",10).attr("y",18)
+        .text(d=>d.data.name);
 
       nodes.append("text")
-        .attr("clip-path", (d,i) => `url(#clip-${i})`)
-        .attr("class", "tag")
-        .attr("x", 10)
-        .attr("y", 36)
-        .text(d => d.data.tag || "");
+        .attr("clip-path",(d,i)=>`url(#clip-${i})`)
+        .attr("class","tag")
+        .attr("x",10).attr("y",36)
+        .text(d=>d.data.tag || "");
 
-      // Başlangıç zoom reset
+      // başlangıç sıfır
       resetZoom(true);
     }
 
-    // =========================
-    // Toolbar
-    // =========================
-    function zoomInTrue() {
-      if (!svg) return;
-      svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2);
-    }
-    function zoomOutTrue() {
-      if (!svg) return;
-      svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2);
-    }
-    function resetZoom(instant=false) {
-      if (!svg) return;
+    function zoomInTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2); }
+    function zoomOutTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2); }
+    function resetZoom(instant=false){
+      if(!svg) return;
       const t = instant ? svg : svg.transition().duration(220);
       t.call(zoomBehavior.transform, d3.zoomIdentity);
     }
 
-    async function takeShot() {
+    async function takeShot(){
       const stage = document.getElementById("stage");
-      const canvas = await html2canvas(stage, { backgroundColor: null, scale: 2 });
+      const canvas = await html2canvas(stage, { backgroundColor:null, scale:2 });
       const a = document.createElement("a");
       a.href = canvas.toDataURL("image/png");
       a.download = `treemap-shot-${Math.floor(Math.random()*10000)}.png`;
       a.click();
     }
 
-    async function toggleFullscreen() {
+    async function toggleFullscreen(){
       const stage = document.getElementById("stage");
-      if (!document.fullscreenElement) {
-        await stage.requestFullscreen?.();
-      } else {
-        await document.exitFullscreen?.();
-      }
+      if(!document.fullscreenElement) await stage.requestFullscreen?.();
+      else await document.exitFullscreen?.();
     }
 
-    // =========================
-    // Filtre UI
-    // =========================
-    function populateFilterOptions(items) {
+    function populateFilterOptions(items){
       const select = document.getElementById("tagFilter");
       const tags = Array.from(new Set(items.map(x => x.tag || "Diğer")))
         .sort((a,b)=>a.localeCompare(b,"tr"));
-      for (const t of tags) {
-        const opt = document.createElement("option");
-        opt.value = t;
-        opt.textContent = t;
+      for(const t of tags){
+        const opt=document.createElement("option");
+        opt.value=t; opt.textContent=t;
         select.appendChild(opt);
       }
     }
-    function setCountInfo(n) {
-      document.getElementById("countInfo").textContent = `${n} site`;
-    }
+    function setCountInfo(n){ document.getElementById("countInfo").textContent = `${n} site`; }
 
-    // =========================
-    // Resize (DEBOUNCE) - sağlam
-    // =========================
-    let resizeTimer = null;
-    window.addEventListener("resize", () => {
+    // resize debounce
+    let resizeTimer=null;
+    window.addEventListener("resize", ()=>{
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (!currentHierarchy) return;
+      resizeTimer=setTimeout(()=>{
+        if(!currentHierarchy) return;
         renderTreemap(currentHierarchy);
-      }, 120);
+      },120);
     });
 
-    // =========================
-    // Init
-    // =========================
     (async function init(){
-      try {
-        const res = await fetch(LINKS_URL, { cache: "no-store" });
-        if (!res.ok) throw new Error("links.json okunamadı: " + res.status);
+      try{
+        const res = await fetch(LINKS_URL, { cache:"no-store" });
+        if(!res.ok) throw new Error("links.json okunamadı: " + res.status);
 
         const items = await res.json();
 
         populateFilterOptions(items);
         setCountInfo(items.length);
 
-        renderTreemap(toHierarchy(items, "ALL"));
+        renderTreemap(toHierarchy(items,"ALL"));
 
-        document.getElementById("tagFilter").addEventListener("change", (e) => {
-          const tag = e.target.value;
-          const filteredCount = (tag === "ALL")
-            ? items.length
-            : items.filter(x => (x.tag||"Diğer") === tag).length;
-
+        document.getElementById("tagFilter").addEventListener("change",(e)=>{
+          const tag=e.target.value;
+          const filteredCount = (tag==="ALL") ? items.length : items.filter(x => (x.tag||"Diğer")===tag).length;
           setCountInfo(filteredCount);
-          renderTreemap(toHierarchy(items, tag)); // resetZoom zaten render içinde
+          renderTreemap(toHierarchy(items, tag));
         });
 
         document.getElementById("zoomInBtn").addEventListener("click", zoomInTrue);
         document.getElementById("zoomOutBtn").addEventListener("click", zoomOutTrue);
-        document.getElementById("resetZoomBtn").addEventListener("click", () => resetZoom(false));
+        document.getElementById("resetZoomBtn").addEventListener("click", ()=>resetZoom(false));
         document.getElementById("shotBtn").addEventListener("click", takeShot);
         document.getElementById("fsBtn").addEventListener("click", toggleFullscreen);
 
-        document.addEventListener("fullscreenchange", () => {
-          const icon = document.querySelector("#fsBtn i");
-          if (!icon) return;
+        document.addEventListener("fullscreenchange", ()=>{
+          const icon=document.querySelector("#fsBtn i");
+          if(!icon) return;
           icon.className = document.fullscreenElement ? "fa-solid fa-compress" : "fa-solid fa-expand";
         });
 
-      } catch (err) {
+      }catch(err){
         console.error(err);
         document.getElementById("chart").innerHTML =
           `<div style="padding:18px;color:#fff;">Hata: ${err.message}</div>`;
