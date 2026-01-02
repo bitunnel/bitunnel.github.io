@@ -166,7 +166,7 @@
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        // Pan + pinch/zoom için en stabil ayar:
+        // Pan + pinch/zoom için:
         .style("touch-action", "none");
 
       gRoot = svg.append("g");
@@ -183,18 +183,24 @@
 
       const leaves = root.leaves();
 
-      const contentW = d3.max(leaves, d => d.x1) || width;
-      const contentH = d3.max(leaves, d => d.y1) || height;
+      // ✅ Gerçek bounds (paddingOuter dahil) -> tam doğru ortalama
+      const minX = d3.min(leaves, d => d.x0) ?? 0;
+      const maxX = d3.max(leaves, d => d.x1) ?? width;
+      const minY = d3.min(leaves, d => d.y0) ?? 0;
+      const maxY = d3.max(leaves, d => d.y1) ?? height;
+
+      const contentW = (maxX - minX) || width;
+      const contentH = (maxY - minY) || height;
 
       // Fit scale (BASE)
       const scaleX = width / contentW;
       const scaleY = height / contentH;
       BASE_SCALE = Math.min(scaleX, scaleY);
-      BASE_SCALE = Math.max(BASE_SCALE, 1);
+      BASE_SCALE = Math.max(BASE_SCALE, 1); // ana ekrandan küçük olmasın
 
-      // Center
-      const baseTx = (width  - contentW * BASE_SCALE) / 2;
-      const baseTy = (height - contentH * BASE_SCALE) / 2;
+      // Center (minX/minY telafili)
+      const baseTx = (width  - contentW * BASE_SCALE) / 2 - (minX * BASE_SCALE);
+      const baseTy = (height - contentH * BASE_SCALE) / 2 - (minY * BASE_SCALE);
       baseTransform = d3.zoomIdentity.translate(baseTx, baseTy).scale(BASE_SCALE);
 
       // --- Click mi drag mi? (site açma hatası olmasın)
@@ -209,7 +215,7 @@
         return Math.abs(a.k - b.k) < eps && Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps;
       }
 
-      // Pan sınırı: boşluk göstermesin
+      // ✅ Pan/Zoom sınırı (boşluk göstermesin) - bounds'lu clamp
       function constrain(t){
         const k = t.k;
 
@@ -220,14 +226,15 @@
         const scaledW = contentW * k;
         const scaledH = contentH * k;
 
-        // İçerik ekranı doldursun: translate clamp
-        const minX = width  - scaledW;
-        const maxX = baseTx;
-        const minY = height - scaledH;
-        const maxY = baseTy;
+        // İçeriğin görünür alandan taşmaması için translate aralığı
+        const minTx = width  - scaledW - (minX * k);
+        const maxTx = 0      - (minX * k);
 
-        const x = Math.max(Math.min(t.x, maxX), minX);
-        const y = Math.max(Math.min(t.y, maxY), minY);
+        const minTy = height - scaledH - (minY * k);
+        const maxTy = 0      - (minY * k);
+
+        const x = Math.max(Math.min(t.x, maxTx), minTx);
+        const y = Math.max(Math.min(t.y, maxTy), minTy);
 
         return d3.zoomIdentity.translate(x, y).scale(k);
       }
@@ -235,10 +242,9 @@
       zoomBehavior = d3.zoom()
         .scaleExtent([BASE_SCALE, MAX_SCALE])
         .filter((event) => {
-          // Sol tık + touch pan açık, wheel zoom açık, pinch açık.
-          // Sağ tık / ctrl+wheel vb. istemiyorsan burada kapatabiliriz.
+          // Dblclick zoom kapalı (daha temiz)
           if (event.type === "dblclick") return false;
-          return true;
+          return true; // pan + wheel + pinch açık
         })
         .on("zoom", (event) => {
           if (isApplyingTransform) return;
@@ -257,7 +263,6 @@
         });
 
       svg.call(zoomBehavior);
-      // D3'ün double click zoom'unu kapatalım (isteğe bağlı ama daha temiz)
       svg.on("dblclick.zoom", null);
 
       // Nodes
@@ -274,7 +279,6 @@
           downPoint = { x: event.clientX, y: event.clientY };
         })
         .on("pointerup", (event, d) => {
-          // drag yaptıysa açma
           if (!downPoint) return;
           const dx = event.clientX - downPoint.x;
           const dy = event.clientY - downPoint.y;
