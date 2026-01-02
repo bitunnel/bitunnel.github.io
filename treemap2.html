@@ -123,7 +123,6 @@
       ["Popüler", "#f59e0b"]
     ]);
 
-    // ✅ Profesyonel zoom limitleri
     const MAX_SCALE = 8;
     let BASE_SCALE = 1;
 
@@ -152,6 +151,9 @@
     let svg, gRoot, zoomBehavior;
     let currentHierarchy = null;
 
+    // ✅ base transform (fit + center)
+    let baseTransform = d3.zoomIdentity;
+
     function clearChart(){ document.getElementById("chart").innerHTML=""; }
 
     function renderTreemap(hierarchyData){
@@ -166,7 +168,7 @@
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        // mobilde tek parmakla pan olmasın, pinch olsun:
+        // tek parmakla pan yok, pinch var
         .style("touch-action", "pinch-zoom");
 
       gRoot = svg.append("g");
@@ -184,7 +186,7 @@
       const leaves = root.leaves();
 
       // =========================
-      // ✅ Dinamik BASE_SCALE (fit-to-screen)
+      // Dinamik BASE_SCALE + merkezleme
       // =========================
       const contentW = d3.max(leaves, d => d.x1) || width;
       const contentH = d3.max(leaves, d => d.y1) || height;
@@ -192,26 +194,57 @@
       const scaleX = width / contentW;
       const scaleY = height / contentH;
 
-      // Treemap sahneye sığsın
       BASE_SCALE = Math.min(scaleX, scaleY);
+      BASE_SCALE = Math.max(BASE_SCALE, 1); // ana ekrandan küçük olmasın
 
-      // Ana ekrandan daha küçük olmasın (minimum 1)
-      BASE_SCALE = Math.max(BASE_SCALE, 1);
+      // Merkezleme: (genelde 0 olur ama profesyonel dursun)
+      const baseTx = (width - contentW * BASE_SCALE) / 2;
+      const baseTy = (height - contentH * BASE_SCALE) / 2;
+
+      baseTransform = d3.zoomIdentity.translate(baseTx, baseTy).scale(BASE_SCALE);
 
       // =========================
-      // ✅ PAN kapalı, ✅ wheel + pinch zoom açık
-      // ✅ min zoom = BASE_SCALE
+      // Constrain: zoom sonrası kaymayı engelle
+      // =========================
+      function constrain(t){
+        const k = t.k;
+
+        // BASE'e geldiyse otomatik "tam ortaya" dön
+        const EPS = 1e-3;
+        if (k <= BASE_SCALE + EPS) return baseTransform;
+
+        const scaledW = contentW * k;
+        const scaledH = contentH * k;
+
+        // Görüntü alanını taşırma (boşluk bırakma)
+        const minX = Math.min(baseTx, width - scaledW);
+        const maxX = Math.max(baseTx, width - scaledW); // genelde min==max değil, güvenli
+
+        const minY = Math.min(baseTy, height - scaledH);
+        const maxY = Math.max(baseTy, height - scaledH);
+
+        const x = Math.max(Math.min(t.x, maxX), minX);
+        const y = Math.max(Math.min(t.y, maxY), minY);
+
+        return d3.zoomIdentity.translate(x, y).scale(k);
+      }
+
+      // =========================
+      // PAN kapalı, wheel + pinch zoom açık
       // =========================
       zoomBehavior = d3.zoom()
         .scaleExtent([BASE_SCALE, MAX_SCALE])
         .filter((event) => {
           if (event.type === "mousedown" || event.type === "touchstart") return false; // pan kapalı
-          if (event.type === "wheel") return true;    // scroll zoom açık
-          if (event.type === "touchmove") return true; // pinch zoom açık
+          if (event.type === "wheel") return true;      // scroll zoom
+          if (event.type === "touchmove") return true;  // pinch zoom
           return false;
         })
         .on("zoom", (event) => {
-          gRoot.attr("transform", event.transform);
+          const t = constrain(event.transform);
+          // D3 internal state'i de aynı transform'a çekelim ki drift kalmasın:
+          svg.call(zoomBehavior.transform, t);
+          gRoot.attr("transform", t);
         });
 
       svg.call(zoomBehavior);
@@ -259,18 +292,19 @@
         .attr("x",10).attr("y",36)
         .text(d=>d.data.tag || "");
 
-      // ✅ İlk görünüm: fit-to-screen (BASE_SCALE)
+      // İlk görünüm: fit + center
       resetZoom(true);
     }
 
     function zoomInTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2); }
     function zoomOutTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2); }
 
-    // ✅ Reset: BASE_SCALE'e dön (ana görünüm)
+    // Reset: baseTransform'e dön
     function resetZoom(instant=false){
       if(!svg) return;
       const t = instant ? svg : svg.transition().duration(220);
-      t.call(zoomBehavior.transform, d3.zoomIdentity.scale(BASE_SCALE));
+      t.call(zoomBehavior.transform, baseTransform);
+      gRoot.attr("transform", baseTransform);
     }
 
     async function takeShot(){
