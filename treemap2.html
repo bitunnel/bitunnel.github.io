@@ -123,6 +123,10 @@
       ["Popüler", "#f59e0b"]
     ]);
 
+    // ✅ Profesyonel zoom limitleri
+    const MAX_SCALE = 8;
+    let BASE_SCALE = 1;
+
     function hash(s=""){ let h=0; for(let i=0;i<s.length;i++) h=Math.imul(31,h)+s.charCodeAt(i)|0; return h; }
     function colorForTag(tag){ return TAG_COLORS.get(tag) || d3.schemeTableau10[Math.abs(hash(tag)) % 10]; }
     function openUrl(url){ if(!url) return; window.open(url,"_blank","noopener,noreferrer"); }
@@ -162,32 +166,10 @@
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        // mobilde tek parmakla sürükle-pan olmasın, ama pinch olsun:
+        // mobilde tek parmakla pan olmasın, pinch olsun:
         .style("touch-action", "pinch-zoom");
 
       gRoot = svg.append("g");
-
-      // ✅ PAN kapalı, ✅ wheel + pinch zoom açık
-      zoomBehavior = d3.zoom()
-        .scaleExtent([0.6, 8])
-        .filter((event) => {
-          // Drag (mouse/touch) ile pan'i kapat
-          if (event.type === "mousedown" || event.type === "touchstart") return false;
-
-          // Wheel ile zoom açık
-          if (event.type === "wheel") return true;
-
-          // Mobilde pinch (touchmove) eventleri d3 tarafından yönetilir
-          // pinch sırasında d3 "touchmove" görür, buna izin verelim
-          if (event.type === "touchmove") return true;
-
-          return false;
-        })
-        .on("zoom", (event) => {
-          gRoot.attr("transform", event.transform);
-        });
-
-      svg.call(zoomBehavior);
 
       const root = d3.hierarchy(hierarchyData)
         .sum(d => d.value || 0)
@@ -200,6 +182,39 @@
         (root);
 
       const leaves = root.leaves();
+
+      // =========================
+      // ✅ Dinamik BASE_SCALE (fit-to-screen)
+      // =========================
+      const contentW = d3.max(leaves, d => d.x1) || width;
+      const contentH = d3.max(leaves, d => d.y1) || height;
+
+      const scaleX = width / contentW;
+      const scaleY = height / contentH;
+
+      // Treemap sahneye sığsın
+      BASE_SCALE = Math.min(scaleX, scaleY);
+
+      // Ana ekrandan daha küçük olmasın (minimum 1)
+      BASE_SCALE = Math.max(BASE_SCALE, 1);
+
+      // =========================
+      // ✅ PAN kapalı, ✅ wheel + pinch zoom açık
+      // ✅ min zoom = BASE_SCALE
+      // =========================
+      zoomBehavior = d3.zoom()
+        .scaleExtent([BASE_SCALE, MAX_SCALE])
+        .filter((event) => {
+          if (event.type === "mousedown" || event.type === "touchstart") return false; // pan kapalı
+          if (event.type === "wheel") return true;    // scroll zoom açık
+          if (event.type === "touchmove") return true; // pinch zoom açık
+          return false;
+        })
+        .on("zoom", (event) => {
+          gRoot.attr("transform", event.transform);
+        });
+
+      svg.call(zoomBehavior);
 
       const nodes = gRoot.selectAll("g.node")
         .data(leaves)
@@ -244,16 +259,18 @@
         .attr("x",10).attr("y",36)
         .text(d=>d.data.tag || "");
 
-      // başlangıç sıfır
+      // ✅ İlk görünüm: fit-to-screen (BASE_SCALE)
       resetZoom(true);
     }
 
     function zoomInTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2); }
     function zoomOutTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2); }
+
+    // ✅ Reset: BASE_SCALE'e dön (ana görünüm)
     function resetZoom(instant=false){
       if(!svg) return;
       const t = instant ? svg : svg.transition().duration(220);
-      t.call(zoomBehavior.transform, d3.zoomIdentity);
+      t.call(zoomBehavior.transform, d3.zoomIdentity.scale(BASE_SCALE));
     }
 
     async function takeShot(){
