@@ -6,11 +6,9 @@
   <title>Treemap | Bitunnel</title>
   <meta name="description" content="TR ve Global bahis/casino giriş adreslerini tek tıkla açabileceğiniz treemap platformu." />
 
-  <!-- UI (opsiyonel) -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
 
-  <!-- D3 + html2canvas -->
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -66,10 +64,8 @@
     .node { cursor:pointer; }
     .node rect { stroke: rgba(255,255,255,.18); }
     .node:hover rect { stroke: rgba(255,255,255,.60); }
-
     .label { pointer-events:none; font-size: 12px; fill:#fff; }
     .tag { pointer-events:none; font-size: 11px; fill: rgba(255,255,255,.82); }
-    .mini { pointer-events:none; font-size: 11px; fill: rgba(255,255,255,.75); }
 
     .badge-mini {
       display:inline-block; padding: 4px 10px; border-radius:999px;
@@ -85,6 +81,7 @@
       outline: none;
     }
     .select option { color:#111; }
+
     .footerbar {
       margin-top: 10px;
       display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
@@ -100,7 +97,7 @@
       <div class="leftbar">
         <span class="pill"><i class="fa-solid fa-chart-tree-map"></i> Treemap</span>
         <span class="pill">Kaynak: <span class="kbd">links.json</span></span>
-        <span class="hint">Kutuya tıkla → JSON’daki URL yeni sekmede açılsın • Glow = trend</span>
+        <span class="hint">Kutuya tıkla → JSON’daki URL yeni sekmede açılsın</span>
       </div>
 
       <div class="leftbar">
@@ -111,12 +108,6 @@
             <option value="ALL">Tümü</option>
           </select>
         </label>
-
-        <button id="liveBtn" class="pill" style="gap:10px; cursor:pointer;">
-          <i class="fa-solid fa-wifi"></i>
-          <span id="liveText">Canlı: açık</span>
-        </button>
-
         <span id="countInfo" class="badge-mini">0 site</span>
       </div>
     </div>
@@ -148,143 +139,27 @@
     // =========================
     const LINKS_URL = "./links.json";
 
-    // Canlı simülasyon ayarları
-    const REFRESH_MS = 1200;   // ekranda ne sıklıkla güncellensin (ms)
-    const TICK_MS    = 1800;   // değerleri ne sıklıkla oynatalım (ms)
-    const BOOST_MS   = 15000;  // tıklanınca boost süresi
-    const GLOW_MAX_PX = 14;
-
-    // Tag renkleri (yoksa palette)
     const TAG_COLORS = new Map([
       ["BetConstruct", "#7c3aed"],
       ["Pronet Gaming", "#06b6d4"],
       ["Popüler", "#f59e0b"]
     ]);
 
-    // =========================
-    // UTIL
-    // =========================
     function hash(s="") {
       let h = 0;
       for (let i=0;i<s.length;i++) h = Math.imul(31,h) + s.charCodeAt(i) | 0;
       return h;
     }
-    function clamp(x,a,b){ return Math.max(a, Math.min(b, x)); }
-
     function colorForTag(tag) {
       return TAG_COLORS.get(tag) || d3.schemeTableau10[Math.abs(hash(tag)) % 10];
     }
-
     function openUrl(url) {
       if (!url) return;
       window.open(url, "_blank", "noopener,noreferrer");
     }
 
-    // Trend glow
-    function glowStyle(trend){
-      const t = clamp(trend, -1, 1);
-      const strength = clamp(Math.abs(t), 0, 1);
-      const isUp = t >= 0;
-
-      const stroke = isUp
-        ? `rgba(34,197,94,${0.15 + strength * 0.65})`
-        : `rgba(239,68,68,${0.15 + strength * 0.65})`;
-
-      const blurPx = Math.round(6 + strength * GLOW_MAX_PX);
-      const glowCol = isUp ? "rgba(34,197,94,0.55)" : "rgba(239,68,68,0.55)";
-      const filter = (strength < 0.12) ? "none" : `drop-shadow(0 0 ${blurPx}px ${glowCol})`;
-
-      return { stroke, strokeWidth: 1 + strength * 3, filter };
-    }
-
-    // =========================
-    // SUNUCUSUZ CANLI STATS (SIMULASYON)
-    // =========================
-    const sim = {
-      byId: new Map(),    // id -> { clicks_24h, clicks_1h, prev_1h }
-      boosts: new Map(),  // id -> boostUntil
-    };
-
-    function simInit(items){
-      for(const it of items){
-        const seed = Math.abs(hash(it.id)) % 50;
-        sim.byId.set(it.id, {
-          clicks_24h: 20 + seed,
-          clicks_1h:  2 + (seed % 6),
-          prev_1h:    2 + ((seed + 2) % 6),
-        });
-      }
-    }
-
-    function simTick(items){
-      const now = Date.now();
-
-      for(const it of items){
-        const s = sim.byId.get(it.id) || { clicks_24h: 10, clicks_1h: 1, prev_1h: 1 };
-
-        const cat = (it.category || "").toLowerCase();
-        let volatility = 1.0;
-        if(cat.includes("popular")) volatility = 2.4;
-        else if(cat.includes("pronet")) volatility = 1.4;
-        else if(cat.includes("betconstruct")) volatility = 1.2;
-
-        const boostUntil = sim.boosts.get(it.id) || 0;
-        const boost = (now < boostUntil) ? 3 : 0;
-
-        const delta = Math.round((Math.random() * 2 - 1) * volatility) + boost;
-
-        s.prev_1h = s.clicks_1h;
-        s.clicks_1h = clamp(s.clicks_1h + delta, 0, 999);
-
-        // 24h yavaş birikir
-        const add24 = Math.max(0, Math.round(s.clicks_1h * 0.15));
-        s.clicks_24h = clamp(s.clicks_24h + add24, 0, 999999);
-
-        sim.byId.set(it.id, s);
-      }
-    }
-
-    function simTrackClick(id){
-      sim.boosts.set(id, Date.now() + BOOST_MS);
-      const s = sim.byId.get(id);
-      if(s){
-        s.clicks_1h += 4;
-        s.clicks_24h += 8;
-        sim.byId.set(id, s);
-      }
-    }
-
-    function getStatsMap(items){
-      const out = {};
-      for(const it of items){
-        out[it.id] = sim.byId.get(it.id) || { clicks_24h: 0, clicks_1h: 0, prev_1h: 0 };
-      }
-      return out;
-    }
-
-    // =========================
-    // Ağırlık / Trend hesapları
-    // =========================
-    function computeSize(stat){
-      if(!stat) return 1;
-      const c24 = stat.clicks_24h || 0;
-      const c1  = stat.clicks_1h  || 0;
-
-      // daha belirgin büyüme:
-      return Math.max(1, c24 * 2 + c1 * 12);
-    }
-
-    function computeTrend(stat){
-      if(!stat) return 0;
-      const cur = stat.clicks_1h || 0;
-      const prev = stat.prev_1h || 0;
-      return (cur - prev) / Math.max(1, prev);
-    }
-
-    // =========================
     // links.json -> hierarchy (tag gruplu)
-    // =========================
-    function toHierarchy(items, statsMap, onlyTag = "ALL") {
+    function toHierarchy(items, onlyTag = "ALL") {
       const filtered = (onlyTag === "ALL")
         ? items
         : items.filter(x => (x.tag || "Diğer") === onlyTag);
@@ -295,58 +170,56 @@
         name: "Bahis ve Casino Siteleri",
         children: Array.from(groups, ([tag, arr]) => ({
           name: tag,
-          children: arr.map(x => {
-            const s = statsMap[x.id];
-            return {
-              id: x.id,
-              name: x.label,
-              url: x.url,
-              tag: x.tag || "Diğer",
-              category: x.category || "",
-              clicks_1h: s?.clicks_1h || 0,
-              clicks_24h: s?.clicks_24h || 0,
-              trend: computeTrend(s),
-              value: computeSize(s)
-            };
-          })
+          children: arr.map(x => ({
+            name: x.label,
+            url: x.url,
+            tag: x.tag || "Diğer",
+            category: x.category || "",
+            value: 1
+          }))
         }))
       };
     }
 
     // =========================
-    // D3 Treemap + Zoom (update'li)
+    // D3 Treemap + Zoom (PAN KAPALI)
     // =========================
     let svg, gRoot, zoomBehavior;
-    let itemsCache = [];
-    let liveOn = true;
-    let tickTimer = null;
-    let refreshTimer = null;
+    let currentHierarchy = null;
 
-    function initSvg(){
+    function clearChart() {
+      document.getElementById("chart").innerHTML = "";
+    }
+
+    function renderTreemap(hierarchyData) {
+      currentHierarchy = hierarchyData;
+
       const el = document.getElementById("chart");
+      clearChart();
+
       const width = el.clientWidth;
       const height = el.clientHeight;
 
-      el.innerHTML = "";
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        .style("touch-action","none");
+        // Mobilde sürükleyip “çekme” hissini bitirir:
+        .style("touch-action", "manipulation"); // none değil (sayfa davranışı daha doğal)
 
       gRoot = svg.append("g");
 
+      // Zoom davranışı: BUTONLARLA ZOOM, PAN YOK
       zoomBehavior = d3.zoom()
         .scaleExtent([0.6, 8])
-        .on("zoom", (event) => gRoot.attr("transform", event.transform));
+        // 🔒 Sadece programatik (buton) transform olsun: kullanıcı drag/touch/wheel yapamasın
+        .filter(() => false)
+        .on("zoom", (event) => {
+          gRoot.attr("transform", event.transform);
+        });
 
       svg.call(zoomBehavior);
-    }
 
-    function layout(hierarchyData){
-      const el = document.getElementById("chart");
-      const width = el.clientWidth;
-      const height = el.clientHeight;
-
+      // Treemap layout
       const root = d3.hierarchy(hierarchyData)
         .sum(d => d.value || 0)
         .sort((a,b) => (b.value||0) - (a.value||0));
@@ -357,87 +230,76 @@
         .paddingOuter(10)
         (root);
 
-      return root.leaves();
-    }
+      const leaves = root.leaves();
 
-    function renderTreemap(hierarchyData, animate=true){
-      if(!svg) initSvg();
-
-      const leaves = layout(hierarchyData);
-
-      // key = id
-      const sel = gRoot.selectAll("g.node")
-        .data(leaves, d => d.data.id);
-
-      sel.exit()
-        .transition().duration(animate ? 250 : 0)
-        .style("opacity", 0)
-        .remove();
-
-      const enter = sel.enter()
+      const nodes = gRoot.selectAll("g.node")
+        .data(leaves)
+        .enter()
         .append("g")
-        .attr("class","node")
+        .attr("class", "node")
+        .attr("transform", d => `translate(${d.x0},${d.y0})`)
         .attr("tabindex", 0)
-        .attr("role","link")
-        .style("opacity", 0)
-        .on("click", (event, d) => {
-          openUrl(d.data.url);
-          simTrackClick(d.data.id);
-        })
+        .attr("role", "link")
+        .attr("aria-label", d => `${d.data.name} sitesini aç`)
+        .on("click", (event, d) => openUrl(d.data.url))
         .on("keydown", (event, d) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
             openUrl(d.data.url);
-            simTrackClick(d.data.id);
           }
         });
 
-      enter.append("rect").attr("rx",12).attr("ry",12);
-      enter.append("text").attr("class","label").attr("x",10).attr("y",18);
-      enter.append("text").attr("class","tag").attr("x",10).attr("y",36);
-      enter.append("text").attr("class","mini").attr("x",10).attr("y",54);
-
-      const merged = enter.merge(sel);
-
-      merged.transition().duration(animate ? 420 : 0)
-        .ease(d3.easeCubicOut)
-        .style("opacity", 1)
-        .attr("transform", d => `translate(${d.x0},${d.y0})`);
-
-      merged.select("rect").transition().duration(animate ? 420 : 0)
-        .ease(d3.easeCubicOut)
+      nodes.append("rect")
+        .attr("rx", 12)
+        .attr("ry", 12)
         .attr("width", d => Math.max(0, d.x1 - d.x0))
         .attr("height", d => Math.max(0, d.y1 - d.y0))
         .attr("fill", d => colorForTag(d.data.tag || d.parent?.data?.name || "Diğer"))
-        .attr("opacity", 0.92)
-        .attr("stroke", d => glowStyle(d.data.trend || 0).stroke)
-        .attr("stroke-width", d => glowStyle(d.data.trend || 0).strokeWidth)
-        .style("filter", d => glowStyle(d.data.trend || 0).filter);
+        .attr("opacity", 0.92);
 
-      merged.select("text.label").text(d => d.data.name);
-      merged.select("text.tag").text(d => d.data.tag || "");
+      // ClipPath
+      nodes.append("clipPath")
+        .attr("id", (d, i) => `clip-${i}`)
+        .append("rect")
+        .attr("rx", 12)
+        .attr("ry", 12)
+        .attr("width", d => Math.max(0, d.x1 - d.x0))
+        .attr("height", d => Math.max(0, d.y1 - d.y0));
 
-      merged.select("text.mini")
-        .text(d => {
-          const t = Math.round((d.data.trend || 0) * 100);
-          const sign = t > 0 ? "+" : "";
-          return `1h: ${d.data.clicks_1h} • 24h: ${d.data.clicks_24h} • ${sign}${t}%`;
-        });
+      nodes.append("text")
+        .attr("clip-path", (d,i) => `url(#clip-${i})`)
+        .attr("class", "label")
+        .attr("x", 10)
+        .attr("y", 18)
+        .text(d => d.data.name);
 
-      merged.select("rect").each(function(d){
-        const t = Math.round((d.data.trend || 0) * 100);
-        const sign = t > 0 ? "+" : "";
-        const title = `${d.data.name}\n${d.data.tag}\n1h: ${d.data.clicks_1h} | 24h: ${d.data.clicks_24h}\nTrend: ${sign}${t}%`;
-        d3.select(this).attr("title", title);
-      });
+      nodes.append("text")
+        .attr("clip-path", (d,i) => `url(#clip-${i})`)
+        .attr("class", "tag")
+        .attr("x", 10)
+        .attr("y", 36)
+        .text(d => d.data.tag || "");
+
+      // Başlangıç zoom reset
+      resetZoom(true);
     }
 
     // =========================
     // Toolbar
     // =========================
-    function zoomInTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2); }
-    function zoomOutTrue(){ if(!svg) return; svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2); }
-    function resetZoom(){ if(!svg) return; svg.transition().duration(220).call(zoomBehavior.transform, d3.zoomIdentity); }
+    function zoomInTrue() {
+      if (!svg) return;
+      svg.transition().duration(180).call(zoomBehavior.scaleBy, 1.2);
+    }
+    function zoomOutTrue() {
+      if (!svg) return;
+      svg.transition().duration(180).call(zoomBehavior.scaleBy, 1/1.2);
+    }
+    function resetZoom(instant=false) {
+      if (!svg) return;
+      const t = instant ? svg : svg.transition().duration(220);
+      t.call(zoomBehavior.transform, d3.zoomIdentity);
+    }
 
     async function takeShot() {
       const stage = document.getElementById("stage");
@@ -450,8 +312,11 @@
 
     async function toggleFullscreen() {
       const stage = document.getElementById("stage");
-      if (!document.fullscreenElement) await stage.requestFullscreen?.();
-      else await document.exitFullscreen?.();
+      if (!document.fullscreenElement) {
+        await stage.requestFullscreen?.();
+      } else {
+        await document.exitFullscreen?.();
+      }
     }
 
     // =========================
@@ -459,7 +324,8 @@
     // =========================
     function populateFilterOptions(items) {
       const select = document.getElementById("tagFilter");
-      const tags = Array.from(new Set(items.map(x => x.tag || "Diğer"))).sort((a,b)=>a.localeCompare(b,"tr"));
+      const tags = Array.from(new Set(items.map(x => x.tag || "Diğer")))
+        .sort((a,b)=>a.localeCompare(b,"tr"));
       for (const t of tags) {
         const opt = document.createElement("option");
         opt.value = t;
@@ -472,32 +338,16 @@
     }
 
     // =========================
-    // Live loop (simülasyon)
+    // Resize (DEBOUNCE) - sağlam
     // =========================
-    function refreshNow(animate=true){
-      const tag = document.getElementById("tagFilter").value || "ALL";
-      const statsMap = getStatsMap(itemsCache);
-      const hierarchy = toHierarchy(itemsCache, statsMap, tag);
-      renderTreemap(hierarchy, animate);
-    }
-
-    function startLive(){
-      if(tickTimer || refreshTimer) return;
-      liveOn = true;
-      document.getElementById("liveText").textContent = "Canlı: açık";
-
-      tickTimer = setInterval(()=> simTick(itemsCache), TICK_MS);
-      refreshTimer = setInterval(()=> refreshNow(true), REFRESH_MS);
-    }
-
-    function stopLive(){
-      liveOn = false;
-      document.getElementById("liveText").textContent = "Canlı: kapalı";
-      if(tickTimer) clearInterval(tickTimer);
-      if(refreshTimer) clearInterval(refreshTimer);
-      tickTimer = null;
-      refreshTimer = null;
-    }
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (!currentHierarchy) return;
+        renderTreemap(currentHierarchy);
+      }, 120);
+    });
 
     // =========================
     // Init
@@ -509,59 +359,32 @@
 
         const items = await res.json();
 
-        // id zorunlu
-        const missing = items.find(x => !x.id);
-        if (missing) throw new Error("links.json içinde id eksik: " + JSON.stringify(missing));
+        populateFilterOptions(items);
+        setCountInfo(items.length);
 
-        itemsCache = items;
+        renderTreemap(toHierarchy(items, "ALL"));
 
-        populateFilterOptions(itemsCache);
-        setCountInfo(itemsCache.length);
-
-        // sim başlangıç + ilk render
-        simInit(itemsCache);
-        initSvg();
-        refreshNow(false);
-
-        // filtre değişince
         document.getElementById("tagFilter").addEventListener("change", (e) => {
           const tag = e.target.value;
           const filteredCount = (tag === "ALL")
-            ? itemsCache.length
-            : itemsCache.filter(x => (x.tag||"Diğer") === tag).length;
+            ? items.length
+            : items.filter(x => (x.tag||"Diğer") === tag).length;
+
           setCountInfo(filteredCount);
-          resetZoom();
-          refreshNow(false);
+          renderTreemap(toHierarchy(items, tag)); // resetZoom zaten render içinde
         });
 
-        // canlı butonu
-        document.getElementById("liveBtn").addEventListener("click", () => {
-          if(liveOn) stopLive();
-          else startLive();
-        });
-
-        // toolbar
         document.getElementById("zoomInBtn").addEventListener("click", zoomInTrue);
         document.getElementById("zoomOutBtn").addEventListener("click", zoomOutTrue);
-        document.getElementById("resetZoomBtn").addEventListener("click", resetZoom);
+        document.getElementById("resetZoomBtn").addEventListener("click", () => resetZoom(false));
         document.getElementById("shotBtn").addEventListener("click", takeShot);
         document.getElementById("fsBtn").addEventListener("click", toggleFullscreen);
 
-        // fullscreen ikon değişimi
         document.addEventListener("fullscreenchange", () => {
           const icon = document.querySelector("#fsBtn i");
           if (!icon) return;
           icon.className = document.fullscreenElement ? "fa-solid fa-compress" : "fa-solid fa-expand";
         });
-
-        // resize -> svg yeniden kur + render
-        window.addEventListener("resize", () => {
-          initSvg();
-          refreshNow(false);
-        });
-
-        // live başlat
-        startLive();
 
       } catch (err) {
         console.error(err);
