@@ -123,11 +123,8 @@
       ["Popüler", "#f59e0b"]
     ]);
 
-    // Zoom limitleri
     const MAX_SCALE = 8;
     let BASE_SCALE = 1;
-
-    // baseTransform (fit + center)
     let baseTransform = d3.zoomIdentity;
 
     function hash(s=""){ let h=0; for(let i=0;i<s.length;i++) h=Math.imul(31,h)+s.charCodeAt(i)|0; return h; }
@@ -169,8 +166,8 @@
       svg = d3.select(el).append("svg")
         .attr("width", width)
         .attr("height", height)
-        // pan yok, pinch var
-        .style("touch-action", "pinch-zoom");
+        // Pan + pinch/zoom için en stabil ayar:
+        .style("touch-action", "none");
 
       gRoot = svg.append("g");
 
@@ -186,22 +183,25 @@
 
       const leaves = root.leaves();
 
-      // İçerik boyutları (treemap alanı)
       const contentW = d3.max(leaves, d => d.x1) || width;
       const contentH = d3.max(leaves, d => d.y1) || height;
 
-      // BASE_SCALE: ekrana sığdırma
+      // Fit scale (BASE)
       const scaleX = width / contentW;
       const scaleY = height / contentH;
       BASE_SCALE = Math.min(scaleX, scaleY);
-      BASE_SCALE = Math.max(BASE_SCALE, 1); // ana ekrandan küçük olmasın
+      BASE_SCALE = Math.max(BASE_SCALE, 1);
 
-      // Merkezleme
+      // Center
       const baseTx = (width  - contentW * BASE_SCALE) / 2;
       const baseTy = (height - contentH * BASE_SCALE) / 2;
       baseTransform = d3.zoomIdentity.translate(baseTx, baseTy).scale(BASE_SCALE);
 
-      // guard: recursion olmasın
+      // --- Click mi drag mi? (site açma hatası olmasın)
+      let downPoint = null;
+      const DRAG_THRESHOLD = 6; // px
+
+      // --- Recursion guard
       let isApplyingTransform = false;
 
       function sameTransform(a, b) {
@@ -209,20 +209,18 @@
         return Math.abs(a.k - b.k) < eps && Math.abs(a.x - b.x) < eps && Math.abs(a.y - b.y) < eps;
       }
 
-      // Zoom sonrası kaymayı engelle + BASE'e gelince ortala
+      // Pan sınırı: boşluk göstermesin
       function constrain(t){
         const k = t.k;
 
-        // BASE'e gelince direkt "fit+center"
+        // BASE'e gelince tam fit+center
         const EPS = 1e-3;
         if (k <= BASE_SCALE + EPS) return baseTransform;
 
         const scaledW = contentW * k;
         const scaledH = contentH * k;
 
-        // Boşluk bırakmayacak sınırlar:
-        // - solda/en yukarı: (width - scaledW), (height - scaledH)
-        // - sağda/en aşağı: baseTx/baseTy (center referansı)
+        // İçerik ekranı doldursun: translate clamp
         const minX = width  - scaledW;
         const maxX = baseTx;
         const minY = height - scaledH;
@@ -237,12 +235,10 @@
       zoomBehavior = d3.zoom()
         .scaleExtent([BASE_SCALE, MAX_SCALE])
         .filter((event) => {
-          // pan kapalı
-          if (event.type === "mousedown" || event.type === "touchstart") return false;
-          // zoom açık
-          if (event.type === "wheel") return true;
-          if (event.type === "touchmove") return true; // pinch
-          return false;
+          // Sol tık + touch pan açık, wheel zoom açık, pinch açık.
+          // Sağ tık / ctrl+wheel vb. istemiyorsan burada kapatabiliriz.
+          if (event.type === "dblclick") return false;
+          return true;
         })
         .on("zoom", (event) => {
           if (isApplyingTransform) return;
@@ -252,7 +248,7 @@
 
           gRoot.attr("transform", t2);
 
-          // D3 internal state'i sadece gerektiğinde güncelle (recursion yok)
+          // internal state'i eşitle (recursion guard ile)
           if (!sameTransform(t1, t2)) {
             isApplyingTransform = true;
             svg.call(zoomBehavior.transform, t2);
@@ -261,6 +257,8 @@
         });
 
       svg.call(zoomBehavior);
+      // D3'ün double click zoom'unu kapatalım (isteğe bağlı ama daha temiz)
+      svg.on("dblclick.zoom", null);
 
       // Nodes
       const nodes = gRoot.selectAll("g.node")
@@ -272,7 +270,18 @@
         .attr("tabindex",0)
         .attr("role","link")
         .attr("aria-label", d => `${d.data.name} sitesini aç`)
-        .on("click",(event,d)=>openUrl(d.data.url))
+        .on("pointerdown", (event) => {
+          downPoint = { x: event.clientX, y: event.clientY };
+        })
+        .on("pointerup", (event, d) => {
+          // drag yaptıysa açma
+          if (!downPoint) return;
+          const dx = event.clientX - downPoint.x;
+          const dy = event.clientY - downPoint.y;
+          downPoint = null;
+          if (Math.hypot(dx, dy) > DRAG_THRESHOLD) return;
+          openUrl(d.data.url);
+        })
         .on("keydown",(event,d)=>{
           if(event.key==="Enter" || event.key===" "){
             event.preventDefault();
@@ -306,7 +315,7 @@
         .attr("x",10).attr("y",36)
         .text(d=>d.data.tag || "");
 
-      // İlk görünüm: fit + center
+      // Başlangıç: fit + center
       resetZoom(true);
     }
 
