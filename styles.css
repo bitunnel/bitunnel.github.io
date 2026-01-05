@@ -452,3 +452,8 @@ body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color
   outline:2px solid var(--good);
   outline-offset: 2px;
 }
+/* ====== GLOBAL HIDDEN FIX ====== */
+/* Skeleton, empty state vs. kesin gizlensin */
+[hidden] {
+  display: none !important;
+}
