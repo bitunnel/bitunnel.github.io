@@ -1,26 +1,25 @@
 "use strict";
 
 /**
- * Bitunnel App
+ * Bitunnel App (PRO)
  * - Mobile-first UI
- * - Safe rendering (no innerHTML from JSON)
- * - Favorites (id/url key)
- * - Recent opened
- * - Search + filters + sort
- * - PWA ready
+ * - links.json -> safe render (innerHTML yok)
+ * - Favorites, Recent, Usage-based “smart” sorting
+ * - Search + category filters + toast
+ * - Skeleton kesin kapanır (hidden + display none)
  */
 
 const STORAGE = {
-  theme: "bitunnel_theme_v2",
-  fav: "bitunnel_fav_v2",
-  recent: "bitunnel_recent_v2",
-  usage: "bitunnel_usage_v2" // click counts by key
+  theme: "bitunnel_theme_v3",
+  fav: "bitunnel_fav_v3",
+  recent: "bitunnel_recent_v3",
+  usage: "bitunnel_usage_v3"
 };
 
 const SORTS = [
   { id: "smart", label: "Akıllı" },
   { id: "az", label: "A → Z" },
-  { id: "new", label: "Yeni eklenen" } // links.json order
+  { id: "new", label: "Yeni eklenen" }
 ];
 
 const VALID_CATEGORIES = new Set(["popular", "betconstruct", "pronet"]);
@@ -75,17 +74,15 @@ let state = {
   sort: "smart",
   query: "",
   favorites: new Set(),
-  recent: [], // array of keys
-  usage: {}   // key -> count
+  recent: [],
+  usage: {}
 };
 
+/* ---------- Helpers ---------- */
 function safeJsonParse(str, fallback) {
   try { return JSON.parse(str); } catch { return fallback; }
 }
-
-function keyOf(link) {
-  return link.id || link.url;
-}
+function keyOf(link) { return link.id || link.url; }
 
 function normalizeLink(item, index) {
   const url = String(item?.url || "").trim();
@@ -101,6 +98,44 @@ function normalizeLink(item, index) {
   return { id, label, url, tag, category, logo, addedIndex };
 }
 
+function applyTheme(theme) {
+  const isLight = theme === "light";
+  document.body.classList.toggle("light", isLight);
+  localStorage.setItem(STORAGE.theme, isLight ? "light" : "dark");
+  els.btnTheme.textContent = isLight ? "☀" : "☾";
+}
+
+function toast(msg) {
+  els.toast.hidden = false;
+  els.toast.textContent = msg;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => { els.toast.hidden = true; }, 1400);
+}
+
+function debounce(fn, delay = 130) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+/* Logo strategy:
+   - links.json "logo" varsa kullan
+   - yoksa Google S2 favicon (domain bazlı) */
+function faviconUrl(link) {
+  if (link.logo) return link.logo;
+  try {
+    const u = new URL(link.url);
+    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(u.hostname)}&sz=128`;
+  } catch { return ""; }
+}
+
+function simplifyUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.hostname + (u.pathname && u.pathname !== "/" ? u.pathname : "");
+  } catch { return url; }
+}
+
+/* ---------- Storage ---------- */
 function loadLocalState() {
   const theme = localStorage.getItem(STORAGE.theme) || "dark";
   applyTheme(theme);
@@ -118,56 +153,14 @@ function loadLocalState() {
 function saveFavorites() {
   localStorage.setItem(STORAGE.fav, JSON.stringify(Array.from(state.favorites)));
 }
-
 function saveRecent() {
   localStorage.setItem(STORAGE.recent, JSON.stringify(state.recent.slice(0, 30)));
 }
-
 function saveUsage() {
   localStorage.setItem(STORAGE.usage, JSON.stringify(state.usage));
 }
 
-function applyTheme(theme) {
-  const isLight = theme === "light";
-  document.body.classList.toggle("light", isLight);
-  localStorage.setItem(STORAGE.theme, isLight ? "light" : "dark");
-  if (els.btnTheme) els.btnTheme.textContent = isLight ? "☀" : "☾";
-}
-
-function toast(msg) {
-  els.toast.hidden = false;
-  els.toast.textContent = msg;
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => {
-    els.toast.hidden = true;
-  }, 1400);
-}
-
-function debounce(fn, delay = 130) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
-}
-
-/**
- * Logo strategy:
- * 1) If links.json provides "logo": use it (relative or absolute)
- * 2) else try favicon from Google S2
- */
-function faviconUrl(link) {
-  if (link.logo) return link.logo;
-
-  try {
-    const u = new URL(link.url);
-    const domain = u.hostname;
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
-  } catch {
-    return "";
-  }
-}
-
+/* ---------- UI ---------- */
 function buildChip(label) {
   const s = document.createElement("span");
   s.className = "chip";
@@ -200,8 +193,7 @@ function statBox(val, key) {
 
 function renderStats(visibleCount, totalCount) {
   const favCount = state.favorites.size;
-  const catSet = new Set(state.links.map(l => l.category));
-  const catCount = catSet.size;
+  const catCount = new Set(state.links.map(l => l.category)).size;
 
   els.statsRow.innerHTML = "";
   els.statsRow.append(
@@ -238,7 +230,9 @@ function renderQuickFilters() {
 function matchesQuery(link, q) {
   if (!q) return true;
   const t = q.toLowerCase();
-  const domain = (() => { try { return new URL(link.url).hostname; } catch { return ""; } })();
+
+  let domain = "";
+  try { domain = new URL(link.url).hostname; } catch {}
 
   return (
     link.label.toLowerCase().includes(t) ||
@@ -256,18 +250,15 @@ function matchesCategory(link, cat) {
 }
 
 function sortLinks(list) {
-  const sort = state.sort;
-
-  if (sort === "az") {
-    return list.slice().sort((a,b) => a.label.localeCompare(b.label, "tr"));
+  if (state.sort === "az") {
+    return list.slice().sort((a, b) => a.label.localeCompare(b.label, "tr"));
+  }
+  if (state.sort === "new") {
+    return list.slice().sort((a, b) => a.addedIndex - b.addedIndex);
   }
 
-  if (sort === "new") {
-    return list.slice().sort((a,b) => a.addedIndex - b.addedIndex);
-  }
-
-  // smart: favorites first, then most-used, then A-Z
-  return list.slice().sort((a,b) => {
+  // smart: favorites -> most-used -> A-Z
+  return list.slice().sort((a, b) => {
     const ka = keyOf(a), kb = keyOf(b);
     const fa = state.favorites.has(ka) ? 1 : 0;
     const fb = state.favorites.has(kb) ? 1 : 0;
@@ -279,15 +270,6 @@ function sortLinks(list) {
 
     return a.label.localeCompare(b.label, "tr");
   });
-}
-
-function simplifyUrl(url) {
-  try {
-    const u = new URL(url);
-    return u.hostname + (u.pathname && u.pathname !== "/" ? u.pathname : "");
-  } catch {
-    return url;
-  }
 }
 
 function createCard(link) {
@@ -304,25 +286,25 @@ function createCard(link) {
   const ico = document.createElement("div");
   ico.className = "favicon";
 
-  const favUrl = faviconUrl(link);
-  if (favUrl) {
+  const src = faviconUrl(link);
+  if (src) {
     const img = document.createElement("img");
     img.loading = "lazy";
     img.alt = `${link.label} logo`;
-    img.src = favUrl;
+    img.src = src;
     img.onerror = () => {
       ico.innerHTML = "";
-      const fallback = document.createElement("div");
-      fallback.className = "fallbackIcon";
-      fallback.textContent = (link.label || "•").slice(0,1).toUpperCase();
-      ico.appendChild(fallback);
+      const f = document.createElement("div");
+      f.className = "fallbackIcon";
+      f.textContent = (link.label || "•").slice(0, 1).toUpperCase();
+      ico.appendChild(f);
     };
     ico.appendChild(img);
   } else {
-    const fallback = document.createElement("div");
-    fallback.className = "fallbackIcon";
-    fallback.textContent = (link.label || "•").slice(0,1).toUpperCase();
-    ico.appendChild(fallback);
+    const f = document.createElement("div");
+    f.className = "fallbackIcon";
+    f.textContent = (link.label || "•").slice(0, 1).toUpperCase();
+    ico.appendChild(f);
   }
 
   const meta = document.createElement("div");
@@ -338,11 +320,9 @@ function createCard(link) {
 
   const tags = document.createElement("div");
   tags.className = "tags";
-
   const tag1 = document.createElement("span");
   tag1.className = "tag";
   tag1.textContent = link.tag || CATEGORY_LABELS[link.category] || link.category;
-
   tags.appendChild(tag1);
 
   meta.append(title, sub, tags);
@@ -384,6 +364,12 @@ function getVisibleLinks() {
   return sortLinks(filtered);
 }
 
+/* ✅ Skeleton kesin kapanacak */
+function hideSkeletonHard() {
+  els.skeleton.hidden = true;
+  els.skeleton.style.display = "none";
+}
+
 function renderMainList() {
   const visible = getVisibleLinks();
 
@@ -392,9 +378,9 @@ function renderMainList() {
   visible.forEach(l => frag.appendChild(createCard(l)));
   els.list.appendChild(frag);
 
-  els.skeleton.hidden = true;
-  els.empty.hidden = visible.length !== 0;
+  hideSkeletonHard();
 
+  els.empty.hidden = visible.length !== 0;
   renderStats(visible.length, state.links.length);
 }
 
@@ -433,23 +419,38 @@ function navigate(viewId) {
   if (viewId === "recent") renderRecentList();
 }
 
+/* ---------- Data load ---------- */
 async function loadLinks() {
+  // Skeleton aç
   els.skeleton.hidden = false;
+  els.skeleton.style.display = "";
   els.empty.hidden = true;
 
-  const resp = await fetch("/links.json", { cache: "no-store" });
-  if (!resp.ok) throw new Error("links.json alınamadı");
+  try {
+    const resp = await fetch("/links.json", { cache: "no-store" });
+    if (!resp.ok) throw new Error("links.json alınamadı");
 
-  const data = await resp.json();
-  if (!Array.isArray(data)) throw new Error("links.json formatı array olmalı");
+    const data = await resp.json();
+    if (!Array.isArray(data)) throw new Error("links.json array olmalı");
 
-  state.links = data.map(normalizeLink).filter(Boolean);
+    state.links = data.map(normalizeLink).filter(Boolean);
 
-  renderQuickFilters();
-  renderHeroChips();
-  renderMainList();
+    renderQuickFilters();
+    renderHeroChips();
+    renderMainList();
+  } catch (err) {
+    console.error(err);
+    els.list.innerHTML = "";
+    els.resultsSub.textContent = "Yüklenemedi";
+    els.empty.hidden = false;
+    toast("links.json yüklenemedi");
+  } finally {
+    // ✅ ne olursa olsun kapanır
+    hideSkeletonHard();
+  }
 }
 
+/* ---------- Actions ---------- */
 async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -474,7 +475,7 @@ function bumpUsage(key) {
 
 function addRecent(key) {
   state.recent = [key, ...state.recent.filter(k => k !== key)].slice(0, 30);
-  localStorage.setItem(STORAGE.recent, JSON.stringify(state.recent));
+  saveRecent();
 }
 
 function onListClick(e) {
@@ -488,17 +489,13 @@ function onListClick(e) {
   if (action === "open") {
     const url = btn.dataset.url;
     const key = card.dataset.key;
-    if (key) {
-      bumpUsage(key);
-      addRecent(key);
-    }
+    if (key) { bumpUsage(key); addRecent(key); }
     window.open(url, "_blank", "noopener,noreferrer");
     return;
   }
 
   if (action === "copy") {
-    const url = btn.dataset.url;
-    copyToClipboard(url);
+    copyToClipboard(btn.dataset.url);
     return;
   }
 
@@ -518,80 +515,7 @@ function onListClick(e) {
   }
 }
 
-function bindEvents() {
-  els.navItems.forEach(b => b.addEventListener("click", () => navigate(b.dataset.go)));
-
-  const toggleTheme = () => {
-    const current = localStorage.getItem(STORAGE.theme) || "dark";
-    applyTheme(current === "light" ? "dark" : "light");
-  };
-  els.btnTheme.addEventListener("click", toggleTheme);
-  els.btnTheme2.addEventListener("click", toggleTheme);
-
-  els.btnRefresh.addEventListener("click", async () => {
-    toast("Yenileniyor…");
-    await loadLinks().catch(() => toast("Yükleme hatası"));
-  });
-
-  els.clearSearch.addEventListener("click", () => {
-    els.search.value = "";
-    state.query = "";
-    renderMainList();
-  });
-
-  els.search.addEventListener("input", debounce(() => {
-    state.query = els.search.value || "";
-    renderMainList();
-  }, 130));
-
-  els.quickFilters.addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (!b) return;
-    state.filterCategory = b.dataset.filter || "all";
-    renderQuickFilters();
-    renderMainList();
-  });
-
-  els.btnSort.addEventListener("click", () => {
-    const idx = SORTS.findIndex(s => s.id === state.sort);
-    const next = SORTS[(idx + 1) % SORTS.length];
-    state.sort = next.id;
-    els.btnSort.textContent = `Sırala: ${next.label}`;
-    renderMainList();
-  });
-
-  els.btnReset.addEventListener("click", () => {
-    state.filterCategory = "all";
-    state.sort = "smart";
-    state.query = "";
-    els.search.value = "";
-    els.btnSort.textContent = "Sırala: Akıllı";
-    renderQuickFilters();
-    renderMainList();
-  });
-
-  els.list.addEventListener("click", onListClick);
-  els.favList.addEventListener("click", onListClick);
-  els.recentList.addEventListener("click", onListClick);
-
-  els.btnClearRecent.addEventListener("click", () => {
-    state.recent = [];
-    saveRecent();
-    renderRecentList();
-    toast("Son açılanlar temizlendi");
-  });
-
-  els.btnClearData.addEventListener("click", () => {
-    state.favorites = new Set();
-    state.recent = [];
-    state.usage = {};
-    saveFavorites(); saveRecent(); saveUsage();
-    renderMainList(); renderFavList(); renderRecentList();
-    toast("Veriler temizlendi");
-  });
-}
-
-/** PWA install */
+/* ---------- PWA ---------- */
 function setupPwaInstall() {
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
@@ -612,6 +536,91 @@ function setupPwaInstall() {
   }
 }
 
+/* ---------- Events ---------- */
+function bindEvents() {
+  // nav
+  els.navItems.forEach(b => b.addEventListener("click", () => navigate(b.dataset.go)));
+
+  // theme
+  const toggleTheme = () => {
+    const current = localStorage.getItem(STORAGE.theme) || "dark";
+    applyTheme(current === "light" ? "dark" : "light");
+  };
+  els.btnTheme.addEventListener("click", toggleTheme);
+  els.btnTheme2.addEventListener("click", toggleTheme);
+
+  // refresh
+  els.btnRefresh.addEventListener("click", async () => {
+    toast("Yenileniyor…");
+    await loadLinks();
+  });
+
+  // search
+  els.clearSearch.addEventListener("click", () => {
+    els.search.value = "";
+    state.query = "";
+    renderMainList();
+  });
+
+  els.search.addEventListener("input", debounce(() => {
+    state.query = els.search.value || "";
+    renderMainList();
+  }, 130));
+
+  // filters
+  els.quickFilters.addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    state.filterCategory = b.dataset.filter || "all";
+    renderQuickFilters();
+    renderMainList();
+  });
+
+  // sort cycle
+  els.btnSort.addEventListener("click", () => {
+    const idx = SORTS.findIndex(s => s.id === state.sort);
+    const next = SORTS[(idx + 1) % SORTS.length];
+    state.sort = next.id;
+    els.btnSort.textContent = `Sırala: ${next.label}`;
+    renderMainList();
+  });
+
+  // reset filters
+  els.btnReset.addEventListener("click", () => {
+    state.filterCategory = "all";
+    state.sort = "smart";
+    state.query = "";
+    els.search.value = "";
+    els.btnSort.textContent = "Sırala: Akıllı";
+    renderQuickFilters();
+    renderMainList();
+  });
+
+  // lists click
+  els.list.addEventListener("click", onListClick);
+  els.favList.addEventListener("click", onListClick);
+  els.recentList.addEventListener("click", onListClick);
+
+  // recent clear
+  els.btnClearRecent.addEventListener("click", () => {
+    state.recent = [];
+    saveRecent();
+    renderRecentList();
+    toast("Son açılanlar temizlendi");
+  });
+
+  // clear all local data
+  els.btnClearData.addEventListener("click", () => {
+    state.favorites = new Set();
+    state.recent = [];
+    state.usage = {};
+    saveFavorites(); saveRecent(); saveUsage();
+    renderMainList(); renderFavList(); renderRecentList();
+    toast("Veriler temizlendi");
+  });
+}
+
+/* ---------- Init ---------- */
 async function init() {
   loadLocalState();
   bindEvents();
@@ -619,16 +628,11 @@ async function init() {
 
   els.btnSort.textContent = "Sırala: Akıllı";
 
-  try {
-    await loadLinks();
-  } catch {
-    els.skeleton.hidden = true;
-    els.empty.hidden = false;
-    els.resultsSub.textContent = "Yüklenemedi";
-    toast("links.json yüklenemedi");
-  }
-
+  await loadLinks();
   navigate("home");
+
+  // failsafe: bazı edge-case’lerde skeleton kalmasın
+  setTimeout(() => hideSkeletonHard(), 1500);
 }
 
 init();
