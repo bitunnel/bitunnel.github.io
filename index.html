@@ -10,9 +10,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/favicon.ico" />
 
-  <!-- Basit güvenlik / profesyonel meta -->
   <meta name="referrer" content="no-referrer" />
-  <!-- Not: dışarıdan favicon çektiğimiz için img-src 'self' data: https: -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
                  img-src 'self' data: https:;
@@ -28,8 +26,8 @@
 <body>
   <!-- Top App Bar -->
   <header class="appbar" role="banner">
-    <div class="brand">
-      <div class="logo">B</div>
+    <div class="brand" aria-label="Bitunnel">
+      <div class="logo" aria-hidden="true">B</div>
       <div class="brandText">
         <div class="brandTitle">Bitunnel</div>
         <div class="brandSub">Mobil hızlı erişim paneli</div>
@@ -54,18 +52,16 @@
           <div class="heroChips" id="hero-chips"></div>
         </div>
 
-        <div class="statsRow" id="stats-row">
-          <!-- JS dolduracak -->
-        </div>
+        <div class="statsRow" id="stats-row"></div>
 
         <div class="searchWrap">
           <div class="searchBox">
-            <span class="searchIcon">🔎</span>
+            <span class="searchIcon" aria-hidden="true">🔎</span>
             <input id="search" class="searchInput" type="search"
                    placeholder="Ara: isim, etiket, kategori, domain…" autocomplete="off" />
             <button id="clear-search" class="clearBtn" type="button" aria-label="Aramayı temizle">✕</button>
           </div>
-          <div class="quickFilters" id="quick-filters"></div>
+          <div class="quickFilters" id="quick-filters" aria-label="Hızlı filtreler"></div>
         </div>
       </div>
 
@@ -78,13 +74,17 @@
       </div>
 
       <!-- Skeleton -->
-      <div class="skeletonList" id="skeleton">
-        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      <div class="skeletonList" id="skeleton" aria-hidden="true">
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
+        <div class="skel"></div>
       </div>
 
       <!-- List -->
       <div class="list" id="list"></div>
 
+      <!-- Empty -->
       <div class="emptyState" id="empty" hidden>
         <div class="emptyTitle">Sonuç bulunamadı</div>
         <div class="emptySub">Arama veya filtreleri değiştirerek tekrar deneyebilirsin.</div>
@@ -127,6 +127,7 @@
     <section class="view" id="view-settings" data-view="settings" aria-label="Ayarlar" hidden>
       <div class="settingsCard">
         <div class="sectionTitle">Ayarlar</div>
+
         <div class="settingRow">
           <div>
             <div class="settingTitle">Tema</div>
@@ -146,13 +147,13 @@
         <div class="settingRow">
           <div>
             <div class="settingTitle">Veriler</div>
-            <div class="settingSub">Favoriler ve son açılanlar</div>
+            <div class="settingSub">Favoriler / Son açılanlar / Sıklık</div>
           </div>
           <button class="dangerBtn" id="btn-clear-data" type="button">Temizle</button>
         </div>
 
         <div class="legalNote">
-          Bu panel yalnızca links.json içeriğini listeler. Dış linkler yeni sekmede açılır.
+          Bu panel yalnızca <strong>links.json</strong> içeriğini listeler. Dış linkler yeni sekmede açılır.
         </div>
       </div>
     </section>
@@ -161,16 +162,16 @@
   <!-- Bottom Nav -->
   <nav class="bottomNav" role="navigation" aria-label="Alt menü">
     <button class="navItem active" data-go="home" type="button">
-      <div class="navIcon">⌂</div><div class="navLabel">Ana</div>
+      <div class="navIcon" aria-hidden="true">⌂</div><div class="navLabel">Ana</div>
     </button>
     <button class="navItem" data-go="fav" type="button">
-      <div class="navIcon">★</div><div class="navLabel">Favori</div>
+      <div class="navIcon" aria-hidden="true">★</div><div class="navLabel">Favori</div>
     </button>
     <button class="navItem" data-go="recent" type="button">
-      <div class="navIcon">⏱</div><div class="navLabel">Son</div>
+      <div class="navIcon" aria-hidden="true">⏱</div><div class="navLabel">Son</div>
     </button>
     <button class="navItem" data-go="settings" type="button">
-      <div class="navIcon">⚙</div><div class="navLabel">Ayar</div>
+      <div class="navIcon" aria-hidden="true">⚙</div><div class="navLabel">Ayar</div>
     </button>
   </nav>
 
