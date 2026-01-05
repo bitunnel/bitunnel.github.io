@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta name="description" content="Bitunnel: links.json ile gelen bağlantıları mobil uygulama gibi listeleyen hızlı erişim paneli." />
+  <title>Bitunnel • Mobil Giriş Paneli</title>
+
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Basit güvenlik / profesyonel meta -->
+  <meta name="referrer" content="no-referrer" />
+  <!-- Not: dışarıdan favicon çektiğimiz için img-src 'self' data: https: -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 img-src 'self' data: https:;
+                 style-src 'self';
+                 script-src 'self';
+                 connect-src 'self';
+                 base-uri 'self';
+                 form-action 'none'">
+
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+  <!-- Top App Bar -->
+  <header class="appbar" role="banner">
+    <div class="brand">
+      <div class="logo">B</div>
+      <div class="brandText">
+        <div class="brandTitle">Bitunnel</div>
+        <div class="brandSub">Mobil hızlı erişim paneli</div>
+      </div>
+    </div>
+
+    <div class="appbarActions">
+      <button class="iconBtn" id="btn-refresh" type="button" aria-label="Yenile">⟳</button>
+      <button class="iconBtn" id="btn-theme" type="button" aria-label="Tema">☾</button>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="content" role="main">
+    <!-- Home -->
+    <section class="view" id="view-home" data-view="home" aria-label="Anasayfa">
+      <div class="heroCard">
+        <div class="heroTop">
+          <div class="heroTitle">
+            Tek panelden <span class="grad">hızlı giriş</span>
+          </div>
+          <div class="heroChips" id="hero-chips"></div>
+        </div>
+
+        <div class="statsRow" id="stats-row">
+          <!-- JS dolduracak -->
+        </div>
+
+        <div class="searchWrap">
+          <div class="searchBox">
+            <span class="searchIcon">🔎</span>
+            <input id="search" class="searchInput" type="search"
+                   placeholder="Ara: isim, etiket, kategori, domain…" autocomplete="off" />
+            <button id="clear-search" class="clearBtn" type="button" aria-label="Aramayı temizle">✕</button>
+          </div>
+          <div class="quickFilters" id="quick-filters"></div>
+        </div>
+      </div>
+
+      <div class="sectionHeader">
+        <div>
+          <div class="sectionTitle">Bağlantılar</div>
+          <div class="sectionSub" id="results-sub">Yükleniyor…</div>
+        </div>
+        <button class="pillBtn" id="btn-sort" type="button">Sırala: Akıllı</button>
+      </div>
+
+      <!-- Skeleton -->
+      <div class="skeletonList" id="skeleton">
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+
+      <!-- List -->
+      <div class="list" id="list"></div>
+
+      <div class="emptyState" id="empty" hidden>
+        <div class="emptyTitle">Sonuç bulunamadı</div>
+        <div class="emptySub">Arama veya filtreleri değiştirerek tekrar deneyebilirsin.</div>
+        <button class="primaryBtn" id="btn-reset" type="button">Filtreleri sıfırla</button>
+      </div>
+    </section>
+
+    <!-- Favorites -->
+    <section class="view" id="view-fav" data-view="fav" aria-label="Favoriler" hidden>
+      <div class="sectionHeader">
+        <div>
+          <div class="sectionTitle">Favoriler</div>
+          <div class="sectionSub" id="fav-sub">—</div>
+        </div>
+      </div>
+      <div class="list" id="fav-list"></div>
+      <div class="emptyState" id="fav-empty" hidden>
+        <div class="emptyTitle">Henüz favori yok</div>
+        <div class="emptySub">Yıldız ikonuna basarak favori ekleyebilirsin.</div>
+      </div>
+    </section>
+
+    <!-- Recent -->
+    <section class="view" id="view-recent" data-view="recent" aria-label="Son Açılanlar" hidden>
+      <div class="sectionHeader">
+        <div>
+          <div class="sectionTitle">Son Açılanlar</div>
+          <div class="sectionSub" id="recent-sub">—</div>
+        </div>
+        <button class="pillBtn" id="btn-clear-recent" type="button">Temizle</button>
+      </div>
+      <div class="list" id="recent-list"></div>
+      <div class="emptyState" id="recent-empty" hidden>
+        <div class="emptyTitle">Kayıt yok</div>
+        <div class="emptySub">Herhangi bir link açtığında burada görünecek.</div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="view" id="view-settings" data-view="settings" aria-label="Ayarlar" hidden>
+      <div class="settingsCard">
+        <div class="sectionTitle">Ayarlar</div>
+        <div class="settingRow">
+          <div>
+            <div class="settingTitle">Tema</div>
+            <div class="settingSub">Açık / Koyu</div>
+          </div>
+          <button class="pillBtn" id="btn-theme-2" type="button">Değiştir</button>
+        </div>
+
+        <div class="settingRow">
+          <div>
+            <div class="settingTitle">PWA</div>
+            <div class="settingSub">Ana ekrana ekle (destek varsa)</div>
+          </div>
+          <button class="pillBtn" id="btn-install" type="button" disabled>Yükle</button>
+        </div>
+
+        <div class="settingRow">
+          <div>
+            <div class="settingTitle">Veriler</div>
+            <div class="settingSub">Favoriler ve son açılanlar</div>
+          </div>
+          <button class="dangerBtn" id="btn-clear-data" type="button">Temizle</button>
+        </div>
+
+        <div class="legalNote">
+          Bu panel yalnızca links.json içeriğini listeler. Dış linkler yeni sekmede açılır.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Nav -->
+  <nav class="bottomNav" role="navigation" aria-label="Alt menü">
+    <button class="navItem active" data-go="home" type="button">
+      <div class="navIcon">⌂</div><div class="navLabel">Ana</div>
+    </button>
+    <button class="navItem" data-go="fav" type="button">
+      <div class="navIcon">★</div><div class="navLabel">Favori</div>
+    </button>
+    <button class="navItem" data-go="recent" type="button">
+      <div class="navIcon">⏱</div><div class="navLabel">Son</div>
+    </button>
+    <button class="navItem" data-go="settings" type="button">
+      <div class="navIcon">⚙</div><div class="navLabel">Ayar</div>
+    </button>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
