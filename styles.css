@@ -31,6 +31,8 @@ body{
   color:var(--text);
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
+  height: 100dvh;
+  overflow: hidden;
 }
 body.light{
   background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 45%, #e5e7eb 100%);
@@ -108,12 +110,13 @@ body.light .iconBtn{
   max-width: 980px;
   margin: 0 auto;
   width: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* each view should fill screen even if content is short */
 .view{
-  display:block;
-  min-height: calc(100dvh - 64px - (88px + var(--safe-bottom)));
+  min-height: 100%;
   /* 64px approx appbar height; if your appbar is taller/shorter adjust */
 }
 
