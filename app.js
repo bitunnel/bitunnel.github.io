@@ -533,19 +533,19 @@ function onListClick(e) {
 
 /* ---------- PWA ---------- */
 function setupPwaInstall() {
-  // ✅ iOS: beforeinstallprompt yok, ama buton tıklanabilir olsun (yönerge vereceğiz)
+  // iOS: prompt yok, ama buton tıklanabilir olsun (yönlendirme yapacağız)
   if (isIOS() && els.btnInstall) {
     els.btnInstall.disabled = false;
   }
 
-  // ✅ Android Chrome / Desktop Chrome: install prompt yakala
+  // Android/desktop: install prompt event
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    if (els.btnInstall) els.btnInstall.disabled = false;
+    if (els.btnInstall) els.btnInstall.disabled = false; // Android'de butonu aç
   });
 
-  // ✅ Eğer zaten standalone (ana ekrana eklenmiş) ise butonu kapat / yüklü yaz
+  // Zaten standalone ise (ana ekrana eklenmişse) butonu "Yüklü" yap
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||
     window.navigator.standalone === true;
@@ -555,18 +555,18 @@ function setupPwaInstall() {
     els.btnInstall.textContent = "Yüklü";
   }
 
-  // ✅ Buton davranışı
+  // Buton tıklama
   if (els.btnInstall) {
     els.btnInstall.addEventListener("click", async () => {
-      // iOS: otomatik kurulum yok → kullanıcıyı yönlendir
+      // iOS: kullanıcıyı yönlendir
       if (isIOS()) {
         toast("iOS: Paylaş (⬆︎) → Ana Ekrana Ekle ile kurulur.");
         return;
       }
 
-      // Android/desktop: prompt geldiyse çalışır
+      // Android/desktop: prompt yoksa desteklenmiyor/şartlar oluşmadı
       if (!deferredInstallPrompt) {
-        toast("Kurulum şu an desteklenmiyor.");
+        toast("Kurulum hazır değil. Chrome'da tekrar deneyin.");
         return;
       }
 
@@ -584,6 +584,7 @@ function setupPwaInstall() {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
   }
 }
+
 
 
 /* ---------- Events ---------- */
