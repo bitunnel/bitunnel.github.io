@@ -485,14 +485,14 @@ body.light .toast{
   border-color:#d1d5db;
 }
 .toastIcon{
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: rgba(148,163,184,.22);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(148,163,184,.16);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 0 0 1px rgba(148,163,184,.38);
+  box-shadow: inset 0 0 0 1px rgba(148,163,184,.32);
 }
 
 .toastIcon .iconSvg{
@@ -500,6 +500,7 @@ body.light .toast{
   height: 24px;
   flex-shrink: 0;
 }
+
 
 
 /* ====== SVG ICON SIZES ====== */
