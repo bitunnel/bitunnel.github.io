@@ -409,6 +409,9 @@ body.light .navItem.active{color:#111827;}
 
 .toast{
   position: fixed;
+  display: inline-flex;          /* 🔴 EK */
+  align-items: center;           /* 🔴 EK */
+  gap: 8px;
   left: 50%;
   transform: translateX(-50%);
   bottom: calc(92px + var(--safe-bottom));
@@ -420,6 +423,18 @@ body.light .navItem.active{color:#111827;}
   color: var(--text);
   z-index: 80;
   box-shadow: 0 14px 30px rgba(0,0,0,.35);
+}
+/* iOS Paylaş ikonu */
+.toastIcon{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toastIcon .iconSvg{
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color:#d1d5db;}
 
