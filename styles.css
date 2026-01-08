@@ -335,35 +335,46 @@ body.light .tag{
   color:#0369a1;
 }
 
-.actions{display:flex; gap:8px; align-items:center;}
-.actionBtn{
-  height:38px;
-  padding: 0 12px;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,.5);
-  background: rgba(15,23,42,.7);
-  color: var(--text);
-  cursor:pointer;
-  display:flex; align-items:center; gap:6px;
+.actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
+
 .actionIconBtn{
-  width:38px; height:38px;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,.5);
-  background: rgba(15,23,42,.7);
+  width:42px;
+  height:42px;
+  border-radius: 14px;
+  border:1px solid rgba(148,163,184,.35);
+  background: rgba(15,23,42,.55);
   color: var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
   cursor:pointer;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
 }
+
+.actionIconBtn:active{
+  transform: scale(.98);
+}
+
+.actionIconBtn:hover{
+  border-color: rgba(148,163,184,.65);
+}
+
 .actionIconBtn.active{
   color:#facc15;
   border-color: rgba(250,204,21,.6);
   background: rgba(250,204,21,.10);
 }
-body.light .actionBtn, body.light .actionIconBtn{
+
+body.light .actionIconBtn{
   background:#f3f4f6;
   border-color:#d1d5db;
   color:#111827;
 }
+
 
 /* ====== SKELETON ====== */
 .skeletonList{margin-top:12px; display:flex; flex-direction:column; gap:10px;}
