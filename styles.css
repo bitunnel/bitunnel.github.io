@@ -151,7 +151,13 @@ body.light .heroCard{
   box-shadow: 0 18px 40px rgba(148,163,184,.28);
 }
 
-.heroTitle{font-size:22px; font-weight:780; letter-spacing:.01em;}
+.heroTitle{
+  font-size: 20px;
+  font-weight: 760;
+  letter-spacing: 0.005em;
+}
+
+
 .grad{
   background: linear-gradient(120deg,#a855f7,#4f46e5,#22c55e);
   -webkit-background-clip:text;
@@ -160,8 +166,8 @@ body.light .heroCard{
 
 .heroChips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;}
 .chip{
-  font-size:12px;
-  padding:6px 10px;
+  font-size:11px;
+  padding:5px 9px;
   border-radius:999px;
   border:1px solid var(--line);
   background: rgba(15,23,42,.7);
@@ -229,15 +235,24 @@ body.light .searchInput{
 }
 body.light .clearBtn{background:#e5e7eb; color:#374151;}
 
-.quickFilters{margin-top:10px; display:flex; flex-wrap:wrap; gap:8px;}
-.pillBtn{
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(148,163,184,.45);
-  background: rgba(15,23,42,.65);
-  color: var(--text);
-  cursor:pointer;
+.quickFilters{
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;                   /* 🔽 butonlar arası boşluk */
 }
+
+.pillBtn{
+  padding: 6px 10px;          /* 🔽 daha kompakt */
+  border-radius: 999px;
+  border: 1px solid rgba(148,163,184,.4);
+  background: rgba(15,23,42,.6);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;            /* 🔽 yazı küçüldü */
+  line-height: 1;
+}
+
 body.light .pillBtn{background:#fff; border-color:#d1d5db; color:#111827;}
 
 .primaryBtn{
