@@ -99,9 +99,11 @@ function normalizeLink(item, index) {
   const tag = String(item?.tag || "").trim();
   const category = VALID_CATEGORIES.has(item?.category) ? item.category : "popular";
   const logo = item?.logo ? String(item.logo).trim() : "";
+  const final_url = item?.final_url ? String(item.final_url).trim() : "";
+  const domain = item?.domain ? String(item.domain).trim() : "";
   const addedIndex = index;
 
-  return { id, label, url, tag, category, logo, addedIndex };
+  return { id, label, url, final_url, domain, tag, category, logo, addedIndex };
 }
 
 function applyTheme(theme) {
