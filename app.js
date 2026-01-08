@@ -216,7 +216,7 @@ function renderHeroChips() {
   if (!els.heroChips) return;
   els.heroChips.innerHTML = "";
   els.heroChips.append(
-    buildChip("Mobil app hissi"),
+    buildChip("Bitunnel app"),
     buildChip("Favoriler ⭐"),
     buildChip("Son açılanlar ⏱"),
     buildChip("Hızlı arama 🔎")
@@ -585,7 +585,7 @@ function setupPwaInstall() {
     els.btnInstall.addEventListener("click", async () => {
       // iOS: kullanıcıyı yönlendir
       if (isIOS()) {
-  toast("Paylaş → 💬 Üç Nokta → ➕ Ana Ekrana Ekle", true);
+  toast("Paylaş → ⋯ Üç Nokta → ➕ Ana Ekrana Ekle", true);
   return;
 }
 
