@@ -7,42 +7,46 @@
   --r2:14px;
   --good:#22c55e;
 
-  /* background tokens (PWA full-height için) */
+  /* background tokens */
   --bg: #0b0f1a;
   --bg-grad: radial-gradient(circle at top, #111827 0, #020617 50%, #000 100%);
 
+  /* safe areas */
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 }
 
 *{box-sizing:border-box; margin:0; padding:0;}
-html,body{height:100%;}
+html,body{height:100%; background: var(--bg);}
 
-/* ====== FULLSCREEN PWA LAYOUT FIX ====== */
-html, body{
-  background: var(--bg);
-}
+a{color:inherit; text-decoration:none;}
+button{font:inherit; color:inherit; background:none; border:none;}
+img{display:block; max-width:100%;}
+:focus-visible{ outline:2px solid var(--good); outline-offset: 2px; }
+[hidden]{ display:none !important; }
+
+/* =========================================================
+   APP SHELL (iOS/PWA stable)
+   - body: grid (appbar / content / bottomnav)
+   - content: the ONLY scroll container
+   - bottomnav: NOT fixed (grid row)
+   ========================================================= */
 body{
   min-height: 100dvh;
-  display:flex;
-  flex-direction:column;
+  height: 100dvh;
+  display:grid;
+  grid-template-rows: auto 1fr auto;
   font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial;
   background: var(--bg-grad);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
-  height: 100dvh;
-  overflow: hidden;
+  overflow:hidden; /* scroll sadece .content'ta */
 }
+
 body.light{
   background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 45%, #e5e7eb 100%);
   color:#111827;
 }
-a{color:inherit; text-decoration:none;}
-button{font:inherit; color:inherit; background:none; border:none;}
-img{display:block; max-width:100%;}
-
-:focus-visible{ outline:2px solid var(--good); outline-offset: 2px; }
-[hidden]{ display:none !important; }
 
 /* ====== APP BAR ====== */
 .appbar{
@@ -73,11 +77,10 @@ body.light .appbar{
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: none;               /* 🔴 GÖLGE YOK */
+  box-shadow: none;
   overflow: hidden;
   flex: 0 0 auto;
 }
-
 .logo img{
   width: 100%;
   height: 100%;
@@ -104,25 +107,23 @@ body.light .iconBtn{
   border-color: rgba(209,213,219,.9);
 }
 
-/* ====== MAIN CONTENT (fills remaining height) ====== */
+/* ====== MAIN CONTENT (the only scroll container) ====== */
 .content{
-  flex: 1;
   min-height: 0; /* iOS scroll fix */
-  padding: 14px 14px calc(88px + var(--safe-bottom));
-  max-width: 980px;
-  margin: 0 auto;
-  width: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+
+  padding: 14px 14px 14px; /* 🔴 bottom padding artık gereksiz */
+  max-width: 980px;
+  margin: 0 auto;
+  width: 100%;
+
   background: transparent;
 }
 
-/* each view should fill screen even if content is short */
-.view{
-  min-height: 100%;
-  /* 64px approx appbar height; if your appbar is taller/shorter adjust */
-}
+/* view fill */
+.view{ min-height: 100%; }
 
 /* ====== HERO ====== */
 .heroCard{
@@ -412,11 +413,8 @@ body.light .settingsCard{background:#fff; border-color:#e5e7eb;}
 .settingSub{font-size:12px; color: var(--muted); margin-top:2px;}
 .legalNote{margin-top:14px; font-size:12px; color: var(--muted);}
 
-/* ====== BOTTOM NAV ====== */
+/* ====== BOTTOM NAV (grid row, NOT fixed) ====== */
 .bottomNav{
-  position: fixed;
-  left:0; right:0;
-  bottom:0;
   padding: 10px 12px calc(10px + var(--safe-bottom));
   display:flex;
   justify-content:space-around;
@@ -424,9 +422,11 @@ body.light .settingsCard{background:#fff; border-color:#e5e7eb;}
   background: rgba(6,8,22,.78);
   backdrop-filter: blur(10px);
   border-top:1px solid var(--line);
-  z-index:60;
 }
-body.light .bottomNav{background: rgba(255,255,255,.85); border-top:1px solid rgba(209,213,219,.9);}
+body.light .bottomNav{
+  background: rgba(255,255,255,.85);
+  border-top:1px solid rgba(209,213,219,.9);
+}
 
 .navItem{
   flex:1;
@@ -458,7 +458,7 @@ body.light .navItem.active{color:#111827;}
   gap: 8px;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(92px + var(--safe-bottom));
+  bottom: calc(12px + var(--safe-bottom)); /* 🔴 bottomnav artık fixed değil */
   padding: 10px 14px;
   border-radius: 999px;
   border:1px solid var(--line);
@@ -468,25 +468,26 @@ body.light .navItem.active{color:#111827;}
   z-index: 80;
   box-shadow: 0 14px 30px rgba(0,0,0,.35);
 }
-body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color:#d1d5db;}
+body.light .toast{
+  background: rgba(255,255,255,.92);
+  color:#111827;
+  border-color:#d1d5db;
+}
 .toastIcon{
   width: 28px;
   height: 28px;
-  border-radius: 9px;                 /* iOS benzeri yumuşak köşe */
-  background: rgba(148,163,184,.18);  /* hafif doluluk */
+  border-radius: 9px;
+  background: rgba(148,163,184,.18);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    inset 0 0 0 1px rgba(148,163,184,.35);
+  box-shadow: inset 0 0 0 1px rgba(148,163,184,.35);
 }
-
 .toastIcon .iconSvg{
   width: 20px;
   height: 20px;
   flex-shrink: 0;
 }
-
 
 /* ====== SVG ICON SIZES ====== */
 .iconSvg{width:20px; height:20px; display:block;}
