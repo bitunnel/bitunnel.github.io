@@ -7,25 +7,43 @@
   --r2:14px;
   --good:#22c55e;
 
+  /* background tokens (PWA full-height için) */
+  --bg: #0b0f1a;
+  --bg-grad: radial-gradient(circle at top, #111827 0, #020617 50%, #000 100%);
+
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
 }
 
 *{box-sizing:border-box; margin:0; padding:0;}
 html,body{height:100%;}
+
+/* ====== FULLSCREEN PWA LAYOUT FIX ====== */
+html, body{
+  background: var(--bg);
+}
 body{
+  min-height: 100dvh;
+  display:flex;
+  flex-direction:column;
   font-family: system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-  background: radial-gradient(circle at top, #111827 0, #020617 50%, #000 100%);
+  background: var(--bg-grad);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 body.light{
   background: radial-gradient(circle at top, #e5e7eb 0, #f9fafb 45%, #e5e7eb 100%);
   color:#111827;
 }
 a{color:inherit; text-decoration:none;}
-button{font:inherit;}
+button{font:inherit; color:inherit; background:none; border:none;}
+img{display:block; max-width:100%;}
 
+:focus-visible{ outline:2px solid var(--good); outline-offset: 2px; }
+[hidden]{ display:none !important; }
+
+/* ====== APP BAR ====== */
 .appbar{
   position: sticky;
   top:0;
@@ -45,7 +63,7 @@ body.light .appbar{
 }
 
 .brand{display:flex; align-items:center; gap:10px;}
-.logo {
+.logo{
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -55,14 +73,13 @@ body.light .appbar{
   justify-content: center;
   box-shadow: 0 10px 25px rgba(79,70,229,0.45);
   overflow: hidden;
+  flex: 0 0 auto;
 }
-
-.logo img {
+.logo img{
   width: 70%;
   height: 70%;
   object-fit: contain;
 }
-
 .brandText{display:flex; flex-direction:column; line-height:1.1;}
 .brandTitle{font-weight:700; letter-spacing:.02em;}
 .brandSub{font-size:12px; color:var(--muted); margin-top:2px;}
@@ -83,13 +100,24 @@ body.light .iconBtn{
   border-color: rgba(209,213,219,.9);
 }
 
+/* ====== MAIN CONTENT (fills remaining height) ====== */
 .content{
+  flex: 1;
+  min-height: 0; /* iOS scroll fix */
   padding: 14px 14px calc(88px + var(--safe-bottom));
   max-width: 980px;
   margin: 0 auto;
+  width: 100%;
 }
-.view{display:block;}
 
+/* each view should fill screen even if content is short */
+.view{
+  display:block;
+  min-height: calc(100dvh - 64px - (88px + var(--safe-bottom)));
+  /* 64px approx appbar height; if your appbar is taller/shorter adjust */
+}
+
+/* ====== HERO ====== */
 .heroCard{
   background: linear-gradient(135deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
   border:1px solid var(--line);
@@ -137,6 +165,7 @@ body.light .chip{
   color:#4b5563;
 }
 
+/* ====== STATS ====== */
 .statsRow{
   margin-top:14px;
   display:grid;
@@ -153,6 +182,7 @@ body.light .chip{
 .statKey{font-size:12px; color: var(--muted); margin-top:2px;}
 body.light .stat{background:#fff; border-color:#e5e7eb;}
 
+/* ====== SEARCH / FILTERS ====== */
 .searchWrap{margin-top:14px;}
 .searchBox{position:relative;}
 .searchIcon{
@@ -222,6 +252,7 @@ body.light .pillBtn{background:#fff; border-color:#d1d5db; color:#111827;}
 }
 body.light .dangerBtn{color:#b91c1c; background: rgba(239,68,68,.08);}
 
+/* ====== SECTION ====== */
 .sectionHeader{
   margin-top: 14px;
   display:flex;
@@ -232,6 +263,7 @@ body.light .dangerBtn{color:#b91c1c; background: rgba(239,68,68,.08);}
 .sectionTitle{font-size:16px; font-weight:760;}
 .sectionSub{font-size:12px; color: var(--muted); margin-top:2px;}
 
+/* ====== LIST / CARDS ====== */
 .list{margin-top:12px; display:flex; flex-direction:column; gap:10px;}
 .card{
   display:flex;
@@ -325,6 +357,7 @@ body.light .actionBtn, body.light .actionIconBtn{
   color:#111827;
 }
 
+/* ====== SKELETON ====== */
 .skeletonList{margin-top:12px; display:flex; flex-direction:column; gap:10px;}
 .skel{
   height:76px;
@@ -337,6 +370,7 @@ body.light .actionBtn, body.light .actionIconBtn{
 @keyframes shimmer{0%{background-position:0 0}100%{background-position:-200% 0}}
 @media (prefers-reduced-motion: reduce){ .skel{animation:none} }
 
+/* ====== EMPTY ====== */
 .emptyState{
   margin-top: 18px;
   padding: 16px;
@@ -349,6 +383,7 @@ body.light .emptyState{background:#fff; border-color:#d1d5db;}
 .emptyTitle{font-weight:800;}
 .emptySub{margin-top:6px; font-size:12px; color: var(--muted);}
 
+/* ====== SETTINGS ====== */
 .settingsCard{
   margin-top: 14px;
   padding: 16px;
@@ -370,6 +405,7 @@ body.light .settingsCard{background:#fff; border-color:#e5e7eb;}
 .settingSub{font-size:12px; color: var(--muted); margin-top:2px;}
 .legalNote{margin-top:14px; font-size:12px; color: var(--muted);}
 
+/* ====== BOTTOM NAV ====== */
 .bottomNav{
   position: fixed;
   left:0; right:0;
@@ -398,7 +434,7 @@ body.light .bottomNav{background: rgba(255,255,255,.85); border-top:1px solid rg
   align-items:center;
   gap:4px;
 }
-.navIcon{font-size:16px;}
+.navIcon{display:flex; align-items:center; justify-content:center;}
 .navLabel{font-size:11px;}
 .navItem.active{
   color: var(--text);
@@ -407,10 +443,11 @@ body.light .bottomNav{background: rgba(255,255,255,.85); border-top:1px solid rg
 }
 body.light .navItem.active{color:#111827;}
 
+/* ====== TOAST ====== */
 .toast{
   position: fixed;
-  display: inline-flex;          /* 🔴 EK */
-  align-items: center;           /* 🔴 EK */
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
   left: 50%;
   transform: translateX(-50%);
@@ -424,36 +461,11 @@ body.light .navItem.active{color:#111827;}
   z-index: 80;
   box-shadow: 0 14px 30px rgba(0,0,0,.35);
 }
-/* iOS Paylaş ikonu */
-.toastIcon{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.toastIcon .iconSvg{
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
 body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color:#d1d5db;}
+.toastIcon{display:inline-flex; align-items:center; justify-content:center;}
+.toastIcon .iconSvg{width:18px; height:18px; flex-shrink:0;}
 
-:focus-visible{ outline:2px solid var(--good); outline-offset: 2px; }
-
-/* ✅ SKELETON/EMPTY FIX: hidden kesin gizler */
-[hidden]{ display:none !important; }
-
-.iconSvg{
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-.navIcon .iconSvg{
-  width: 22px;
-  height: 22px;
-}
-.iconBtn .iconSvg{
-  width: 18px;
-  height: 18px;
-}
-
+/* ====== SVG ICON SIZES ====== */
+.iconSvg{width:20px; height:20px; display:block;}
+.navIcon .iconSvg{width:22px; height:22px;}
+.iconBtn .iconSvg{width:18px; height:18px;}
