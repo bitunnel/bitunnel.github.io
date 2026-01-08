@@ -30,7 +30,6 @@ body{
   background: var(--bg-grad);
   color:var(--text);
   -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
   height: 100dvh;
   overflow: hidden;
 }
@@ -112,6 +111,8 @@ body.light .iconBtn{
   width: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  background: transparent;
 }
 
 /* each view should fill screen even if content is short */
@@ -465,8 +466,24 @@ body.light .navItem.active{color:#111827;}
   box-shadow: 0 14px 30px rgba(0,0,0,.35);
 }
 body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color:#d1d5db;}
-.toastIcon{display:inline-flex; align-items:center; justify-content:center;}
-.toastIcon .iconSvg{width:18px; height:18px; flex-shrink:0;}
+.toastIcon{
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;                 /* iOS benzeri yumuşak köşe */
+  background: rgba(148,163,184,.18);  /* hafif doluluk */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    inset 0 0 0 1px rgba(148,163,184,.35);
+}
+
+.toastIcon .iconSvg{
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
 
 /* ====== SVG ICON SIZES ====== */
 .iconSvg{width:20px; height:20px; display:block;}
