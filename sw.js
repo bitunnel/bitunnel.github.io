@@ -5,7 +5,7 @@
    - Network-first for links.json & app.js
    =============================== */
 
-const CACHE_VERSION = "v13"; // 🔴 HER GÜNCELLEMEDE ARTIR
+const CACHE_VERSION = "v15"; // 🔴 HER GÜNCELLEMEDE ARTIR
 const CACHE_NAME = `bitunnel-app-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -14,7 +14,8 @@ const STATIC_ASSETS = [
   "/styles.css",
   "/app.js",
   "/manifest.webmanifest",
-  "/icons/bitunnel-icon-512.png"
+  "/icons/bitunnel-icon-512.png",
+   "/og/bitunnel-1200x630.png"
 ];
 
 
