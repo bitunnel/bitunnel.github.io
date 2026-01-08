@@ -415,7 +415,16 @@ body.light .actionIconBtn{
 }
 body.light .emptyState{background:#fff; border-color:#d1d5db;}
 .emptyTitle{font-weight:800;}
-.emptySub{margin-top:6px; font-size:12px; color: var(--muted);}
+.emptySub{margin-top:8px; font-size:12px; color: var(--muted);}
+
+.emptyState .primaryBtn{
+  margin-top: 10px;        /* 🔽 üstten boşluk */
+  padding: 8px 12px;      /* 🔽 daha küçük */
+  font-size: 13px;        /* 🔽 yazı küçüldü */
+  font-weight: 600;
+  box-shadow: 0 10px 22px rgba(88,80,236,.35); /* daha hafif */
+}
+
 
 /* ====== SETTINGS ====== */
 .settingsCard{
