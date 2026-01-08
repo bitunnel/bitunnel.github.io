@@ -10,5 +10,3 @@ Dosyalar:
 - manifest.webmanifest
 - sw.js
 - icons/
-
-Not: Eğer repo bir *project page* ise (ör. username.github.io/repo), start_url ve asset yollarını repo path'ine göre güncellemeniz gerekebilir.
