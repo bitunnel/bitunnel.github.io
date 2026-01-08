@@ -5,7 +5,7 @@
    - Network-first for links.json & app.js
    =============================== */
 
-const CACHE_VERSION = "v9"; // 🔴 HER GÜNCELLEMEDE ARTIR
+const CACHE_VERSION = "v10"; // 🔴 HER GÜNCELLEMEDE ARTIR
 const CACHE_NAME = `bitunnel-app-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
