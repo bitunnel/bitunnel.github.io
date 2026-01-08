@@ -112,36 +112,39 @@ function applyTheme(theme) {
 }
 
 function toast(msg, withShareIcon = false) {
-  if (!els.toast) return;
-
   els.toast.hidden = false;
-  els.toast.innerHTML = "";
+
+  // İçeriği sıfırla
+  els.toast.textContent = "";
 
   if (withShareIcon) {
-    const icon = document.createElement("span");
-    icon.className = "toastIcon";
-    icon.innerHTML = `
-  <svg viewBox="0 0 24 24" class="iconSvg" aria-hidden="true">
-    <!-- üst ok -->
-    <path d="M12 3v9" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-    <path d="M8.7 6.4 12 3l3.3 3.4" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+    const iconWrap = document.createElement("span");
+    iconWrap.className = "toastIcon";
+    iconWrap.innerHTML = `
+      <svg class="iconSvg iosShareIcon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>
+        <path d="M8.6 6.4 12 3l3.4 3.4"
+              fill="none" stroke="currentColor" stroke-width="2.8"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7.5 10.5h-1A2.5 2.5 0 0 0 4 13v6.2A2.8 2.8 0 0 0 6.8 22h10.4A2.8 2.8 0 0 0 20 19.2V13a2.5 2.5 0 0 0-2.5-2.5h-1"
+              fill="none" stroke="currentColor" stroke-width="2.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `;
 
-    <!-- kutu -->
-    <path d="M7 10.5v8.2c0 1.2 1 2.3 2.3 2.3h5.4c1.2 0 2.3-1 2.3-2.3v-8.2"
-          fill="none" stroke="currentColor" stroke-width="3.0" stroke-linejoin="round" stroke-linecap="round"/>
-  </svg>
-`;
+    const text = document.createElement("span");
+    text.className = "toastText";
+    text.textContent = msg;
 
-    els.toast.appendChild(icon);
+    els.toast.append(iconWrap, text);
+  } else {
+    els.toast.textContent = msg;
   }
 
-  const text = document.createElement("span");
-  text.textContent = msg;
-  els.toast.appendChild(text);
-
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { els.toast.hidden = true; }, 3000);
+  toast._t = setTimeout(() => { els.toast.hidden = true; }, 2200);
 }
+
 
 
 function debounce(fn, delay = 130) {
