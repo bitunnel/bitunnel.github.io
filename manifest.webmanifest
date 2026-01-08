@@ -1,13 +1,32 @@
 {
-  "name": "Bitunnel",
+  "id": "/",
+  "name": "Bitunnel – Güvenli Giriş Merkezi",
   "short_name": "Bitunnel",
-  "start_url": "/",
+  "description": "Bitunnel, güncel giriş adreslerini tek panelde toplayan hızlı ve güvenli mobil erişim merkezidir.",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#0b0f1a",
-  "theme_color": "#0b0f1a",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#050816",
+  "theme_color": "#050816",
+  "lang": "tr-TR",
+
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    {
+      "src": "/icons/bitunnel-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/bitunnel-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+
+  "categories": ["utilities", "productivity", "tools"],
+  "prefer_related_applications": false
 }
