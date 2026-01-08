@@ -122,7 +122,7 @@ function toast(msg, withShareIcon = false) {
     icon.className = "toastIcon";
     icon.innerHTML = `
       <svg viewBox="0 0 24 24" class="iconSvg" aria-hidden="true">
-        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
         <path d="M8 6.5 12 3l4 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
         <path d="M8 11v8a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
       </svg>
