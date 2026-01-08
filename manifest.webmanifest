@@ -3,7 +3,7 @@
   "name": "Bitunnel – Güvenli Giriş Merkezi",
   "short_name": "Bitunnel",
   "description": "Bitunnel, güncel giriş adreslerini tek panelde toplayan hızlı ve güvenli mobil erişim merkezidir.",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
