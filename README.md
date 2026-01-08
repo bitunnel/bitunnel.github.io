@@ -9,4 +9,6 @@ Dosyalar:
 - links.json
 - manifest.webmanifest
 - sw.js
+- favicon.ico
 - icons/
+- og/
