@@ -416,3 +416,18 @@ body.light .toast{background: rgba(255,255,255,.92); color:#111827; border-color
 
 /* ✅ SKELETON/EMPTY FIX: hidden kesin gizler */
 [hidden]{ display:none !important; }
+
+.iconSvg{
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.navIcon .iconSvg{
+  width: 22px;
+  height: 22px;
+}
+.iconBtn .iconSvg{
+  width: 18px;
+  height: 18px;
+}
+
