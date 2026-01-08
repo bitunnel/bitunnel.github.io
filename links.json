@@ -3,6 +3,7 @@
     "id": "kazandra",
     "label": "Kazandra",
     "url": "https://t.ly/bikaz",
+    "final_url": "https://kazandra.com",
     "tag": "BetConstruct",
     "category": "betconstruct"
   },
@@ -10,6 +11,7 @@
     "id": "timebet",
     "label": "Timebet",
     "url": "https://t.ly/bitime",
+    "final_url": "https://timebet.com",
     "tag": "BetConstruct",
     "category": "betconstruct"
   },
@@ -17,6 +19,7 @@
     "id": "redwin",
     "label": "Redwin",
     "url": "https://t.ly/bired",
+    "final_url": "https://redwin.com",
     "tag": "Pronet Gaming",
     "category": "pronet"
   },
@@ -24,6 +27,7 @@
     "id": "slotbar",
     "label": "Slotbar",
     "url": "https://t.ly/bislot",
+    "final_url": "https://slotbar.com",
     "tag": "Popüler",
     "category": "popular"
   },
@@ -31,6 +35,7 @@
     "id": "kingbetting",
     "label": "Kingbetting",
     "url": "https://t.ly/biking",
+    "final_url": "https://kingbetting.com",
     "tag": "BetConstruct",
     "category": "betconstruct"
   },
@@ -38,6 +43,7 @@
     "id": "betcup",
     "label": "Betcup",
     "url": "https://t.ly/bicup",
+    "final_url": "https://betcup.com",
     "tag": "Pronet Gaming",
     "category": "pronet"
   }
