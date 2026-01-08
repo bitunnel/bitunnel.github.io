@@ -121,12 +121,17 @@ function toast(msg, withShareIcon = false) {
     const icon = document.createElement("span");
     icon.className = "toastIcon";
     icon.innerHTML = `
-      <svg viewBox="0 0 24 24" class="iconSvg" aria-hidden="true">
-        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
-        <path d="M8 6.5 12 3l4 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        <path d="M8 11v8a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-      </svg>
-    `;
+  <svg viewBox="0 0 24 24" class="iconSvg" aria-hidden="true">
+    <!-- üst ok -->
+    <path d="M12 3v9" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M8.7 6.4 12 3l3.3 3.4" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+
+    <!-- kutu -->
+    <path d="M7 10.5v8.2c0 1.2 1 2.3 2.3 2.3h5.4c1.2 0 2.3-1 2.3-2.3v-8.2"
+          fill="none" stroke="currentColor" stroke-width="3.0" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>
+`;
+
     els.toast.appendChild(icon);
   }
 
@@ -580,9 +585,10 @@ function setupPwaInstall() {
     els.btnInstall.addEventListener("click", async () => {
       // iOS: kullanıcıyı yönlendir
       if (isIOS()) {
-  toast("Paylaş → Ana Ekrana Ekle ile kurulur.", true);
+  toast("Paylaş → 💬 Üç Nokta → ➕ Ana Ekrana Ekle", true);
   return;
 }
+
 
 
       // Android/desktop: prompt yoksa desteklenmiyor/şartlar oluşmadı
