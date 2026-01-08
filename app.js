@@ -7,6 +7,7 @@
  * - Favorites, Recent, Usage-based “smart” sorting
  * - Search + category filters + toast
  * - Skeleton kesin kapanır (hidden + display none)
+ * - PWA: iOS için yönergeli kurulum, Android için beforeinstallprompt
  */
 
 const STORAGE = {
@@ -84,6 +85,11 @@ function safeJsonParse(str, fallback) {
 }
 function keyOf(link) { return link.id || link.url; }
 
+function isIOS() {
+  // iOS Safari + iOS Chrome/Edge (hepsi WebKit)
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
 function normalizeLink(item, index) {
   const url = String(item?.url || "").trim();
   if (!url) return null;
@@ -102,10 +108,11 @@ function applyTheme(theme) {
   const isLight = theme === "light";
   document.body.classList.toggle("light", isLight);
   localStorage.setItem(STORAGE.theme, isLight ? "light" : "dark");
-  els.btnTheme.textContent = isLight ? "☀" : "☾";
+  if (els.btnTheme) els.btnTheme.textContent = isLight ? "☀" : "☾";
 }
 
 function toast(msg) {
+  if (!els.toast) return;
   els.toast.hidden = false;
   els.toast.textContent = msg;
   clearTimeout(toast._t);
@@ -133,6 +140,18 @@ function simplifyUrl(url) {
     const u = new URL(url);
     return u.hostname + (u.pathname && u.pathname !== "/" ? u.pathname : "");
   } catch { return url; }
+}
+
+/* ---------- Skeleton (null-safe + hard hide) ---------- */
+function hideSkeletonHard() {
+  if (!els.skeleton) return;
+  els.skeleton.hidden = true;
+  els.skeleton.style.display = "none";
+}
+function showSkeletonHard() {
+  if (!els.skeleton) return;
+  els.skeleton.hidden = false;
+  els.skeleton.style.display = "";
 }
 
 /* ---------- Storage ---------- */
@@ -169,6 +188,7 @@ function buildChip(label) {
 }
 
 function renderHeroChips() {
+  if (!els.heroChips) return;
   els.heroChips.innerHTML = "";
   els.heroChips.append(
     buildChip("Mobil app hissi"),
@@ -192,6 +212,7 @@ function statBox(val, key) {
 }
 
 function renderStats(visibleCount, totalCount) {
+  if (!els.statsRow || !els.resultsSub) return;
   const favCount = state.favorites.size;
   const catCount = new Set(state.links.map(l => l.category)).size;
 
@@ -206,6 +227,7 @@ function renderStats(visibleCount, totalCount) {
 }
 
 function renderQuickFilters() {
+  if (!els.quickFilters) return;
   els.quickFilters.innerHTML = "";
 
   const filters = [
@@ -364,15 +386,10 @@ function getVisibleLinks() {
   return sortLinks(filtered);
 }
 
-/* ✅ Skeleton kesin kapanacak */
-function hideSkeletonHard() {
-  els.skeleton.hidden = true;
-  els.skeleton.style.display = "none";
-}
-
 function renderMainList() {
   const visible = getVisibleLinks();
 
+  if (!els.list) return;
   els.list.innerHTML = "";
   const frag = document.createDocumentFragment();
   visible.forEach(l => frag.appendChild(createCard(l)));
@@ -380,11 +397,12 @@ function renderMainList() {
 
   hideSkeletonHard();
 
-  els.empty.hidden = visible.length !== 0;
+  if (els.empty) els.empty.hidden = visible.length !== 0;
   renderStats(visible.length, state.links.length);
 }
 
 function renderFavList() {
+  if (!els.favList) return;
   const favLinks = state.links.filter(l => state.favorites.has(keyOf(l)));
   const sorted = sortLinks(favLinks);
 
@@ -393,11 +411,12 @@ function renderFavList() {
   sorted.forEach(l => frag.appendChild(createCard(l)));
   els.favList.appendChild(frag);
 
-  els.favEmpty.hidden = sorted.length !== 0;
-  els.favSub.textContent = `${sorted.length} favori`;
+  if (els.favEmpty) els.favEmpty.hidden = sorted.length !== 0;
+  if (els.favSub) els.favSub.textContent = `${sorted.length} favori`;
 }
 
 function renderRecentList() {
+  if (!els.recentList) return;
   const map = new Map(state.links.map(l => [keyOf(l), l]));
   const items = state.recent.map(k => map.get(k)).filter(Boolean);
 
@@ -406,8 +425,8 @@ function renderRecentList() {
   items.forEach(l => frag.appendChild(createCard(l)));
   els.recentList.appendChild(frag);
 
-  els.recentEmpty.hidden = items.length !== 0;
-  els.recentSub.textContent = `${items.length} kayıt`;
+  if (els.recentEmpty) els.recentEmpty.hidden = items.length !== 0;
+  if (els.recentSub) els.recentSub.textContent = `${items.length} kayıt`;
 }
 
 function navigate(viewId) {
@@ -421,10 +440,8 @@ function navigate(viewId) {
 
 /* ---------- Data load ---------- */
 async function loadLinks() {
-  // Skeleton aç
-  els.skeleton.hidden = false;
-  els.skeleton.style.display = "";
-  els.empty.hidden = true;
+  showSkeletonHard();
+  if (els.empty) els.empty.hidden = true;
 
   try {
     const resp = await fetch("/links.json", { cache: "no-store" });
@@ -440,12 +457,11 @@ async function loadLinks() {
     renderMainList();
   } catch (err) {
     console.error(err);
-    els.list.innerHTML = "";
-    els.resultsSub.textContent = "Yüklenemedi";
-    els.empty.hidden = false;
+    if (els.list) els.list.innerHTML = "";
+    if (els.resultsSub) els.resultsSub.textContent = "Yüklenemedi";
+    if (els.empty) els.empty.hidden = false;
     toast("links.json yüklenemedi");
   } finally {
-    // ✅ ne olursa olsun kapanır
     hideSkeletonHard();
   }
 }
@@ -517,19 +533,33 @@ function onListClick(e) {
 
 /* ---------- PWA ---------- */
 function setupPwaInstall() {
+  // Android Chrome / Desktop Chrome
   window.addEventListener("beforeinstallprompt", (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    els.btnInstall.disabled = false;
+    if (els.btnInstall) els.btnInstall.disabled = false;
   });
 
-  els.btnInstall.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    els.btnInstall.disabled = true;
-  });
+  if (els.btnInstall) {
+    els.btnInstall.addEventListener("click", async () => {
+      // iOS: otomatik kurulum yok → yönerge göster
+      if (isIOS()) {
+        toast("iOS: Paylaş (⬆︎) → Ana Ekrana Ekle ile kurulur.");
+        return;
+      }
+
+      // Android/desktop: prompt geldiyse çalışır
+      if (!deferredInstallPrompt) {
+        toast("Kurulum şu an desteklenmiyor.");
+        return;
+      }
+
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      els.btnInstall.disabled = true;
+    });
+  }
 
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js").catch(() => {});
@@ -546,78 +576,92 @@ function bindEvents() {
     const current = localStorage.getItem(STORAGE.theme) || "dark";
     applyTheme(current === "light" ? "dark" : "light");
   };
-  els.btnTheme.addEventListener("click", toggleTheme);
-  els.btnTheme2.addEventListener("click", toggleTheme);
+  if (els.btnTheme) els.btnTheme.addEventListener("click", toggleTheme);
+  if (els.btnTheme2) els.btnTheme2.addEventListener("click", toggleTheme);
 
   // refresh
-  els.btnRefresh.addEventListener("click", async () => {
-    toast("Yenileniyor…");
-    await loadLinks();
-  });
+  if (els.btnRefresh) {
+    els.btnRefresh.addEventListener("click", async () => {
+      toast("Yenileniyor…");
+      await loadLinks();
+    });
+  }
 
   // search
-  els.clearSearch.addEventListener("click", () => {
-    els.search.value = "";
-    state.query = "";
-    renderMainList();
-  });
+  if (els.clearSearch && els.search) {
+    els.clearSearch.addEventListener("click", () => {
+      els.search.value = "";
+      state.query = "";
+      renderMainList();
+    });
 
-  els.search.addEventListener("input", debounce(() => {
-    state.query = els.search.value || "";
-    renderMainList();
-  }, 130));
+    els.search.addEventListener("input", debounce(() => {
+      state.query = els.search.value || "";
+      renderMainList();
+    }, 130));
+  }
 
   // filters
-  els.quickFilters.addEventListener("click", (e) => {
-    const b = e.target.closest("button");
-    if (!b) return;
-    state.filterCategory = b.dataset.filter || "all";
-    renderQuickFilters();
-    renderMainList();
-  });
+  if (els.quickFilters) {
+    els.quickFilters.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      state.filterCategory = b.dataset.filter || "all";
+      renderQuickFilters();
+      renderMainList();
+    });
+  }
 
   // sort cycle
-  els.btnSort.addEventListener("click", () => {
-    const idx = SORTS.findIndex(s => s.id === state.sort);
-    const next = SORTS[(idx + 1) % SORTS.length];
-    state.sort = next.id;
-    els.btnSort.textContent = `Sırala: ${next.label}`;
-    renderMainList();
-  });
+  if (els.btnSort) {
+    els.btnSort.addEventListener("click", () => {
+      const idx = SORTS.findIndex(s => s.id === state.sort);
+      const next = SORTS[(idx + 1) % SORTS.length];
+      state.sort = next.id;
+      els.btnSort.textContent = `Sırala: ${next.label}`;
+      renderMainList();
+    });
+  }
 
   // reset filters
-  els.btnReset.addEventListener("click", () => {
-    state.filterCategory = "all";
-    state.sort = "smart";
-    state.query = "";
-    els.search.value = "";
-    els.btnSort.textContent = "Sırala: Akıllı";
-    renderQuickFilters();
-    renderMainList();
-  });
+  if (els.btnReset && els.search && els.btnSort) {
+    els.btnReset.addEventListener("click", () => {
+      state.filterCategory = "all";
+      state.sort = "smart";
+      state.query = "";
+      els.search.value = "";
+      els.btnSort.textContent = "Sırala: Akıllı";
+      renderQuickFilters();
+      renderMainList();
+    });
+  }
 
   // lists click
-  els.list.addEventListener("click", onListClick);
-  els.favList.addEventListener("click", onListClick);
-  els.recentList.addEventListener("click", onListClick);
+  if (els.list) els.list.addEventListener("click", onListClick);
+  if (els.favList) els.favList.addEventListener("click", onListClick);
+  if (els.recentList) els.recentList.addEventListener("click", onListClick);
 
   // recent clear
-  els.btnClearRecent.addEventListener("click", () => {
-    state.recent = [];
-    saveRecent();
-    renderRecentList();
-    toast("Son açılanlar temizlendi");
-  });
+  if (els.btnClearRecent) {
+    els.btnClearRecent.addEventListener("click", () => {
+      state.recent = [];
+      saveRecent();
+      renderRecentList();
+      toast("Son açılanlar temizlendi");
+    });
+  }
 
   // clear all local data
-  els.btnClearData.addEventListener("click", () => {
-    state.favorites = new Set();
-    state.recent = [];
-    state.usage = {};
-    saveFavorites(); saveRecent(); saveUsage();
-    renderMainList(); renderFavList(); renderRecentList();
-    toast("Veriler temizlendi");
-  });
+  if (els.btnClearData) {
+    els.btnClearData.addEventListener("click", () => {
+      state.favorites = new Set();
+      state.recent = [];
+      state.usage = {};
+      saveFavorites(); saveRecent(); saveUsage();
+      renderMainList(); renderFavList(); renderRecentList();
+      toast("Veriler temizlendi");
+    });
+  }
 }
 
 /* ---------- Init ---------- */
@@ -626,7 +670,7 @@ async function init() {
   bindEvents();
   setupPwaInstall();
 
-  els.btnSort.textContent = "Sırala: Akıllı";
+  if (els.btnSort) els.btnSort.textContent = "Sırala: Akıllı";
 
   await loadLinks();
   navigate("home");
