@@ -157,11 +157,16 @@ function debounce(fn, delay = 130) {
    - yoksa Google S2 favicon (domain bazlı) */
 function faviconUrl(link) {
   if (link.logo) return link.logo;
+
+  const source = link.final_url || link.domain || link.url; // öncelik: final_url
   try {
-    const u = new URL(link.url);
+    const u = new URL(source);
     return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(u.hostname)}&sz=128`;
-  } catch { return ""; }
+  } catch {
+    return "";
+  }
 }
+
 
 function simplifyUrl(url) {
   try {
