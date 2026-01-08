@@ -142,7 +142,7 @@ function toast(msg, withShareIcon = false) {
   }
 
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { els.toast.hidden = true; }, 2200);
+  toast._t = setTimeout(() => { els.toast.hidden = true; }, 3000);
 }
 
 
