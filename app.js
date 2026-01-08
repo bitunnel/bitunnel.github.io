@@ -111,13 +111,33 @@ function applyTheme(theme) {
   if (els.btnTheme) els.btnTheme.textContent = isLight ? "☀" : "☾";
 }
 
-function toast(msg) {
+function toast(msg, withShareIcon = false) {
   if (!els.toast) return;
+
   els.toast.hidden = false;
-  els.toast.textContent = msg;
+  els.toast.innerHTML = "";
+
+  if (withShareIcon) {
+    const icon = document.createElement("span");
+    icon.className = "toastIcon";
+    icon.innerHTML = `
+      <svg viewBox="0 0 24 24" class="iconSvg" aria-hidden="true">
+        <path d="M12 3v10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M8 6.5 12 3l4 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M8 11v8a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+    `;
+    els.toast.appendChild(icon);
+  }
+
+  const text = document.createElement("span");
+  text.textContent = msg;
+  els.toast.appendChild(text);
+
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { els.toast.hidden = true; }, 1400);
+  toast._t = setTimeout(() => { els.toast.hidden = true; }, 1600);
 }
+
 
 function debounce(fn, delay = 130) {
   let t;
@@ -560,9 +580,10 @@ function setupPwaInstall() {
     els.btnInstall.addEventListener("click", async () => {
       // iOS: kullanıcıyı yönlendir
       if (isIOS()) {
-        toast("iOS: Paylaş (⬆︎) → Ana Ekrana Ekle ile kurulur.");
-        return;
-      }
+  toast("Paylaş → Ana Ekrana Ekle ile kurulur.", true);
+  return;
+}
+
 
       // Android/desktop: prompt yoksa desteklenmiyor/şartlar oluşmadı
       if (!deferredInstallPrompt) {
