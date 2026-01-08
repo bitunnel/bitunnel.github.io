@@ -508,7 +508,7 @@ body.light .toast{
 
 .toastText{
   font-size: 13px;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--text);
 }
 
