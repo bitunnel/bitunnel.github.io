@@ -140,7 +140,7 @@ function toast(msg, withShareIcon = false) {
   els.toast.appendChild(text);
 
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => { els.toast.hidden = true; }, 1600);
+  toast._t = setTimeout(() => { els.toast.hidden = true; }, 3000);
 }
 
 
@@ -379,26 +379,49 @@ function createCard(link) {
   actions.className = "actions";
 
   const open = document.createElement("button");
-  open.className = "actionBtn";
-  open.type = "button";
-  open.dataset.action = "open";
-  open.dataset.url = link.url;
-  open.textContent = "Aç ↗";
+open.className = "actionIconBtn";
+open.type = "button";
+open.dataset.action = "open";
+open.dataset.url = link.url;
+open.setAttribute("aria-label", `${link.label} aç`);
+open.title = "Aç";
+open.innerHTML = `
+  <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M14 5h5v5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M10 14 19 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M19 14v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+`;
 
-  const copy = document.createElement("button");
-  copy.className = "actionBtn";
-  copy.type = "button";
-  copy.dataset.action = "copy";
-  copy.dataset.url = link.url;
-  copy.textContent = "Kopyala ⧉";
+const copy = document.createElement("button");
+copy.className = "actionIconBtn";
+copy.type = "button";
+copy.dataset.action = "copy";
+copy.dataset.url = link.url;
+copy.setAttribute("aria-label", `${link.label} linkini kopyala`);
+copy.title = "Kopyala";
+copy.innerHTML = `
+  <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+    <rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M7 15H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
+`;
 
-  const fav = document.createElement("button");
-  fav.className = "actionIconBtn" + (isFav ? " active" : "");
-  fav.type = "button";
-  fav.dataset.action = "fav";
-  fav.dataset.key = k;
-  fav.setAttribute("aria-pressed", isFav ? "true" : "false");
-  fav.textContent = "★";
+const fav = document.createElement("button");
+fav.className = "actionIconBtn favBtn" + (isFav ? " active" : "");
+fav.type = "button";
+fav.dataset.action = "fav";
+fav.dataset.key = k;
+fav.setAttribute("aria-pressed", isFav ? "true" : "false");
+fav.setAttribute("aria-label", isFav ? "Favoriden çıkar" : "Favoriye ekle");
+fav.title = isFav ? "Favoriden çıkar" : "Favoriye ekle";
+fav.innerHTML = `
+  <svg class="iconSvg" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12 17.3 6.9 20l1-5.7L4 9.8l5.7-.8L12 4l2.3 5 5.7.8-3.9 4.5 1 5.7z"
+          fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+  </svg>
+`;
+
 
   actions.append(open, copy, fav);
   card.append(left, actions);
