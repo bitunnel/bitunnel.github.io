@@ -6,6 +6,7 @@ Dosyalar:
 - index.html
 - styles.css
 - app.js
+- ga.js
 - links.json
 - manifest.webmanifest
 - sw.js
