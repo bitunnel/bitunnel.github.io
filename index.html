@@ -71,13 +71,17 @@
   <!-- Referrer / CSP (seninkini korudum) -->
   <meta name="referrer" content="no-referrer" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self';
-                 img-src 'self' data: https:;
-                 style-src 'self';
-                 script-src 'self';
-                 connect-src 'self';
-                 base-uri 'self';
-                 form-action 'none'">
+      content="
+        default-src 'self';
+        base-uri 'self';
+        form-action 'none';
+
+        img-src 'self' data: https:;
+        style-src 'self';
+
+        script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com;
+        connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://stats.g.doubleclick.net;
+      ">
 
   <link rel="stylesheet" href="/styles.css" />
   <!-- Google tag (gtag.js) -->
