@@ -23,10 +23,10 @@ const SORTS = [
   { id: "new", label: "Yeni eklenen" }
 ];
 
-const VALID_CATEGORIES = new Set(["popular", "betconstruct", "pronet"]);
+const VALID_CATEGORIES = new Set(["diger", "betconstruct", "pronet"]);
 const CATEGORY_LABELS = {
   all: "Hepsi",
-  popular: "Popüler",
+  diger: "Diğer",
   betconstruct: "BetConstruct",
   pronet: "Pronet Gaming"
 };
@@ -97,7 +97,7 @@ function normalizeLink(item, index) {
   const id = String(item?.id || "").trim() || undefined;
   const label = String(item?.label || url).trim();
   const tag = String(item?.tag || "").trim();
-  const category = VALID_CATEGORIES.has(item?.category) ? item.category : "popular";
+  const category = VALID_CATEGORIES.has(item?.category) ? item.category : "diger";
   const logo = item?.logo ? String(item.logo).trim() : "";
   const final_url = item?.final_url ? String(item.final_url).trim() : "";
   const domain = item?.domain ? String(item.domain).trim() : "";
@@ -267,7 +267,7 @@ function renderQuickFilters() {
 
   const filters = [
     { id: "all", label: "Hepsi" },
-    { id: "popular", label: "Popüler" },
+    { id: "diger", label: "Diğer" },
     { id: "betconstruct", label: "BetConstruct" },
     { id: "pronet", label: "Pronet" },
     { id: "favorites", label: "Favoriler" }
