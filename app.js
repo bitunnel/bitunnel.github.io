@@ -382,7 +382,7 @@ function createCard(link) {
   tag1.textContent = link.tag || CATEGORY_LABELS[link.category] || link.category;
   tags.appendChild(tag1);
 
-  meta.append(title, sub, tags);
+  meta.append(title, tags); //sub
   left.append(ico, meta);
 
   const actions = document.createElement("div");
