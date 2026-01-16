@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Belly Dance Click-to-Start</title>
+  <style>
+    html, body { margin:0; height:100%; background:#0b0f14; color:#e8eef7; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    #wrap { height:100%; display:grid; place-items:center; }
+    canvas { width:min(92vw, 520px); height:min(92vw, 520px); background:radial-gradient(120% 120% at 50% 30%, #1b2430 0%, #0b0f14 55%, #06080c 100%); border-radius:24px; box-shadow: 0 12px 40px rgba(0,0,0,.45); touch-action:none; }
+    .overlay {
+      position:fixed; inset:0; display:grid; place-items:center;
+      background:rgba(0,0,0,.55); backdrop-filter: blur(6px);
+    }
+    .card {
+      width:min(92vw, 520px); border-radius:20px; padding:20px 18px;
+      background:rgba(20,28,38,.85); border:1px solid rgba(255,255,255,.08);
+      box-shadow: 0 18px 60px rgba(0,0,0,.5);
+    }
+    .title { font-size:22px; font-weight:700; margin:0 0 6px; }
+    .sub { opacity:.85; margin:0 0 14px; line-height:1.35; }
+    .hint { display:flex; gap:10px; flex-wrap:wrap; font-size:13px; opacity:.85; }
+    .pill { padding:6px 10px; border-radius:999px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.06); }
+    .bigbtn {
+      margin-top:14px; width:100%; padding:12px 14px; border-radius:14px;
+      border:0; font-weight:700; cursor:pointer; color:#0b0f14;
+      background:linear-gradient(90deg, #f6d365, #fda085);
+    }
+    .small { margin-top:10px; font-size:12px; opacity:.75; }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="c" width="520" height="520"></canvas>
+  </div>
+
+  <div id="overlay" class="overlay">
+    <div class="card">
+      <p class="title">Belly Dance 🎵</p>
+      <p class="sub">Başlamak için sayfaya tıkla. Sonra ritme uygun şekilde sağa-sola “kalça” hareketi yap!</p>
+      <div class="hint">
+        <div class="pill">← →</div>
+        <div class="pill">Dokun: sürükle</div>
+        <div class="pill">Ritme yakın = daha çok puan</div>
+      </div>
+      <button id="startBtn" class="bigbtn">Tıkla ve Başla</button>
+      <div class="small">Not: Müzik için aynı klasöre <b>music.mp3</b> koyabilirsin.</div>
+    </div>
+  </div>
+
+  <audio id="music" src="music.mp3" preload="auto"></audio>
+
+  <script>
+    // ---------- Helpers ----------
+    const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+    const now = ()=>performance.now();
+
+    // ---------- Canvas ----------
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+
+    // ---------- UI ----------
+    const overlay = document.getElementById("overlay");
+    const startBtn = document.getElementById("startBtn");
+    const audioEl = document.getElementById("music");
+
+    let started = false;
+
+    // ---------- Game State ----------
+    const state = {
+      t0: 0,
+      t: 0,
+      score: 0,
+      combo: 0,
+      best: 0,
+      // dancer control
+      hipX: 0,     // -1..1
+      hipV: 0,
+      // rhythm
+      bpm: 110,
+      beatPhase: 0, // 0..1
+      // input
+      dragging: false,
+      dragStartX: 0,
+      dragHipStart: 0,
+    };
+
+    // beat window: how close to beat to count as "good"
+    const PERFECT = 0.07;
+    const GOOD    = 0.14;
+
+    function start() {
+      if (started) return;
+      started = true;
+      overlay.style.display = "none";
+
+      state.t0 = now();
+      state.best = Number(localStorage.getItem("bd_best") || 0);
+
+      // Try to play music (will work because this is called from click)
+      if (audioEl && audioEl.src) {
+        audioEl.volume = 0.7;
+        audioEl.play().catch(()=>{/* ignore if no file / blocked */});
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    // Start on any click/tap
+    window.addEventListener("pointerdown", (e) => {
+      if (!started) start();
+    }, { passive: true });
+
+    startBtn.addEventListener("click", start);
+
+    // ---------- Input ----------
+    const keys = { left:false, right:false };
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") keys.left = true;
+      if (e.key === "ArrowRight") keys.right = true;
+
+      // Scoring action: "snap" on key press
+      if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && started) {
+        judgeMove(e.key === "ArrowLeft" ? -1 : 1);
+      }
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft") keys.left = false;
+      if (e.key === "ArrowRight") keys.right = false;
+    });
+
+    canvas.addEventListener("pointerdown", (e) => {
+      state.dragging = true;
+      state.dragStartX = e.clientX;
+      state.dragHipStart = state.hipX;
+      canvas.setPointerCapture(e.pointerId);
+    });
+
+    canvas.addEventListener("pointermove", (e) => {
+      if (!state.dragging) return;
+      const dx = (e.clientX - state.dragStartX) / 180; // sensitivity
+      state.hipX = clamp(state.dragHipStart + dx, -1, 1);
+    });
+
+    canvas.addEventListener("pointerup", (e) => {
+      if (!state.dragging) return;
+      state.dragging = false;
+
+      // On release: consider it an action; direction based on hipX sign
+      if (started) {
+        const dir = state.hipX >= 0 ? 1 : -1;
+        judgeMove(dir);
+      }
+    });
+
+    // ---------- Scoring ----------
+    function beatPhaseAtTime(tMs) {
+      const beatMs = 60000 / state.bpm;
+      const phase = (tMs % beatMs) / beatMs; // 0..1
+      return phase;
+    }
+
+    function distToBeat(phase) {
+      // distance to nearest beat at phase 0
+      // e.g. phase 0.98 is close
+      return Math.min(phase, 1 - phase);
+    }
+
+    function judgeMove(dir) {
+      // Slightly nudge hip in that direction
+      state.hipV += dir * 0.9;
+
+      const phase = state.beatPhase;
+      const d = distToBeat(phase);
+
+      let gained = 0;
+      if (d <= PERFECT) {
+        state.combo += 1;
+        gained = 30 + state.combo * 2;
+      } else if (d <= GOOD) {
+        state.combo += 1;
+        gained = 15 + state.combo;
+      } else {
+        state.combo = 0;
+        gained = 0;
+      }
+
+      state.score += gained;
+      if (state.score > state.best) {
+        state.best = state.score;
+        localStorage.setItem("bd_best", String(state.best));
+      }
+
+      // Visual feedback pulse
+      pulse = Math.max(pulse, gained ? 1 : 0.25);
+      lastJudge = { d, gained };
+    }
+
+    // ---------- FX ----------
+    let pulse = 0;
+    let lastJudge = { d: 1, gained: 0 };
+
+    // ---------- Loop ----------
+    function loop() {
+      const tMs = now() - state.t0;
+      state.t = tMs;
+      state.beatPhase = beatPhaseAtTime(tMs);
+
+      // Physics: hip responds to keys unless dragging
+      if (!state.dragging) {
+        const input = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+        state.hipV += input * 0.06;
+        state.hipV *= 0.92;
+        state.hipX = clamp(state.hipX + state.hipV, -1, 1);
+      }
+
+      // Animate pulse
+      pulse *= 0.9;
+
+      draw();
+
+      requestAnimationFrame(loop);
+    }
+
+    function draw() {
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0,0,w,h);
+
+      // Beat ring
+      const phase = state.beatPhase;
+      const d = distToBeat(phase);
+      const beatPulse = 1 - clamp(d / GOOD, 0, 1); // 0..1 in good window
+
+      const cx = w/2, cy = h/2 + 30;
+
+      // Ground glow
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy + 150, 170, 40, 0, 0, Math.PI*2);
+      ctx.fillStyle = "#fda085";
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Beat circle
+      ctx.lineWidth = 10;
+      ctx.globalAlpha = 0.20 + beatPulse * 0.55;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 170 + beatPulse*10, 0, Math.PI*2);
+      ctx.strokeStyle = "#f6d365";
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+
+      // Dancer (simple)
+      // Body
+      const hipOffset = state.hipX * 60;
+      const sway = Math.sin(state.t/140) * 6;
+      const bodyX = cx + hipOffset*0.35;
+      const bodyY = cy - 40 + sway;
+
+      // Head
+      ctx.beginPath();
+      ctx.arc(bodyX, bodyY - 120, 26, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.fill();
+
+      // Torso
+      ctx.lineWidth = 18;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(bodyX, bodyY - 90);
+      ctx.lineTo(bodyX + hipOffset*0.15, bodyY - 10);
+      ctx.strokeStyle = "rgba(255,255,255,.88)";
+      ctx.stroke();
+
+      // Arms
+      ctx.lineWidth = 12;
+      ctx.beginPath();
+      ctx.moveTo(bodyX - 10, bodyY - 70);
+      ctx.quadraticCurveTo(bodyX - 90, bodyY - 90, bodyX - 110, bodyY - 40);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(bodyX + 10, bodyY - 70);
+      ctx.quadraticCurveTo(bodyX + 90, bodyY - 90, bodyX + 110, bodyY - 40);
+      ctx.stroke();
+
+      // Hips (highlight)
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath();
+      ctx.ellipse(cx + hipOffset, cy + 40, 70, 34, 0, 0, Math.PI*2);
+      ctx.fillStyle = "rgba(246,211,101,.95)";
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Skirt
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      ctx.moveTo(cx + hipOffset, cy + 60);
+      ctx.quadraticCurveTo(cx + hipOffset - 160, cy + 210, cx + hipOffset - 10, cy + 230);
+      ctx.quadraticCurveTo(cx + hipOffset + 160, cy + 210, cx + hipOffset, cy + 60);
+      ctx.closePath();
+      ctx.fillStyle = "rgba(253,160,133,.9)";
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // HUD
+      ctx.fillStyle = "rgba(232,238,247,.92)";
+      ctx.font = "700 18px system-ui";
+      ctx.fillText("Skor: " + state.score, 18, 30);
+
+      ctx.font = "600 14px system-ui";
+      ctx.fillStyle = "rgba(232,238,247,.75)";
+      ctx.fillText("Kombo: " + state.combo, 18, 52);
+      ctx.fillText("Best: " + state.best, 18, 72);
+
+      // Timing feedback
+      const label = lastJudge.gained >= 30 ? "PERFECT" : (lastJudge.gained > 0 ? "GOOD" : "MISS");
+      ctx.globalAlpha = 0.25 + pulse * 0.55;
+      ctx.font = "800 40px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillStyle = lastJudge.gained ? "#f6d365" : "rgba(232,238,247,.7)";
+      ctx.fillText(label, cx, 110);
+      ctx.textAlign = "start";
+      ctx.globalAlpha = 1;
+
+      // Instruction small
+      ctx.fillStyle = "rgba(232,238,247,.55)";
+      ctx.font = "500 12px system-ui";
+      ctx.fillText("Ritme yakınken ←/→ bas veya dokunup sürükle.", 18, h - 18);
+    }
+  </script>
+</body>
+</html>
